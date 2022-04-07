@@ -10,6 +10,9 @@ import gg.essential.elementa.constraints.RelativeConstraint
 import gg.essential.elementa.constraints.SiblingConstraint
 import gg.essential.elementa.dsl.*
 import gg.essential.universal.ChatColor
+import gg.essential.api.EssentialAPI
+import net.minecraft.client.gui.GuiMainMenu
+import mynameisjeff.skyblockclientupdater.utils.UpdateChecker
 import mynameisjeff.skyblockclientupdater.gui.elements.SexyButton
 import net.minecraftforge.fml.common.FMLCommonHandler
 import java.awt.Color
@@ -27,7 +30,7 @@ class UpdateSummaryScreen(
         height = RelativeConstraint()
     } childOf contentContainer
 
-    val headerText = UIText("Attempted to update your mods.").constrain {
+    val headerText = UIText("Attempted to update your mods.\nUpdated mods will load upon restart.").constrain {
         x = CenterConstraint()
         y = CenterConstraint()
     }.setTextScale(1.25f.pixels()) childOf headerContainer
@@ -72,14 +75,24 @@ class UpdateSummaryScreen(
         height = ChildBasedSizeConstraint()
     } childOf footerContainer
     private val quitButton = SexyButton(
-        text = "Quit Game",
+        text = "Quit",
         outlineColor = Color.RED,
         primary = false
     ).constrain {
-        width = 150.pixels()
+        width = 50.pixels()
         height = 20.pixels()
     }.onMouseClick {
         FMLCommonHandler.instance().exitJava(0, false)
+    } childOf buttonContainer
+    private val continueButton = SexyButton(
+        text = "Continue to MC"
+    ).constrain {
+        x = SiblingConstraint()
+        width = 150.pixels()
+        height = 20.pixels()
+    }.onMouseClick {
+        UpdateChecker.ignoreUpdates();
+        EssentialAPI.getGuiUtil().openScreen(GuiMainMenu())
     } childOf buttonContainer
 
     init {
