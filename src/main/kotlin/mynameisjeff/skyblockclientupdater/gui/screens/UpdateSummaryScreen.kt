@@ -10,6 +10,7 @@ import gg.essential.elementa.constraints.RelativeConstraint
 import gg.essential.elementa.constraints.SiblingConstraint
 import gg.essential.elementa.dsl.*
 import gg.essential.universal.ChatColor
+import net.minecraft.client.gui.GuiMainMenu
 import mynameisjeff.skyblockclientupdater.gui.elements.SexyButton
 import net.minecraftforge.fml.common.FMLCommonHandler
 import java.awt.Color
@@ -72,14 +73,22 @@ class UpdateSummaryScreen(
         height = ChildBasedSizeConstraint()
     } childOf footerContainer
     private val quitButton = SexyButton(
-        text = "Quit Game",
+        text = "Quit",
         outlineColor = Color.RED,
         primary = false
     ).constrain {
-        width = 150.pixels()
+        width = 50.pixels()
         height = 20.pixels()
     }.onMouseClick {
         FMLCommonHandler.instance().exitJava(0, false)
+    } childOf buttonContainer
+    private val continueButton = SexyButton(
+        text = "Continue to MC"
+    ).constrain {
+        width = 100.pixels()
+        height = 20.pixels()
+    }.onMouseClick {
+        displayScreen(GuiMainMenu())
     } childOf buttonContainer
 
     init {
