@@ -20,9 +20,13 @@ import java.awt.Color
 
     val accentColor = Color(67, 184, 0)
 
+    val mc: Minecraft get() = Minecraft.getMinecraft()
+
+    /* buggy but probably more performant :blamelily:
     val mc: Minecraft by lazy {
         Minecraft.getMinecraft()
-    }
+    }*/
+
     val json = Json {
         ignoreUnknownKeys = true
     }
