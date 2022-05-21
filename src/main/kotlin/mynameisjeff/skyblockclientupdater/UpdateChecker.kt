@@ -1,4 +1,4 @@
-package mynameisjeff.skyblockclientupdater.utils
+package mynameisjeff.skyblockclientupdater
 
 import com.google.gson.JsonParser
 import gg.essential.api.EssentialAPI
@@ -7,13 +7,14 @@ import gg.essential.api.utils.WebUtil
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.decodeFromStream
-import mynameisjeff.skyblockclientupdater.SkyClientUpdater
 import mynameisjeff.skyblockclientupdater.SkyClientUpdater.json
 import mynameisjeff.skyblockclientupdater.SkyClientUpdater.mc
 import mynameisjeff.skyblockclientupdater.data.LocalMod
 import mynameisjeff.skyblockclientupdater.data.MCMod
 import mynameisjeff.skyblockclientupdater.data.RepoMod
 import mynameisjeff.skyblockclientupdater.gui.screens.ModUpdateScreen
+import mynameisjeff.skyblockclientupdater.utils.TickTask
+import mynameisjeff.skyblockclientupdater.utils.readTextAndClose
 import net.minecraft.client.gui.GuiMainMenu
 import net.minecraft.util.Util
 import net.minecraftforge.client.event.GuiOpenEvent
@@ -120,6 +121,7 @@ object UpdateChecker {
                             return@Thread
                         }
                     }
+                    logger.info("\"$runtime\" -jar \"${deleteTask.absolutePath}\" ${needsDelete.joinToString(" ") {"\"${it.first.absolutePath}\""}}")
                     Runtime.getRuntime().exec("\"$runtime\" -jar \"${deleteTask.absolutePath}\" ${needsDelete.joinToString(" ") {"\"${it.first.absolutePath}\""}}")
                     logger.info("Successfully applied SkyClient mod update.")
                 } catch (ex: Throwable) {
@@ -279,7 +281,7 @@ object UpdateChecker {
         logger.info("Checking for SkyClientUpdater delete task...")
         val taskDir = File(File(mc.mcDataDir, "skyclientupdater"), "files")
         val url =
-            "https://cdn.discordapp.com/attachments/807303259902705685/864882597342740511/SkytilsInstaller-1.1-SNAPSHOT.jar"
+            "https://github.com/W-OVERFLOW/Deleter/releases/download/v1.4/Deleter-1.4.jar"
         taskDir.mkdirs()
         val taskFile = File(taskDir, url.substringAfterLast("/"))
         if (!taskFile.exists()) {

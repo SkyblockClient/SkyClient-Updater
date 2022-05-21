@@ -12,7 +12,7 @@ import gg.essential.elementa.dsl.*
 import gg.essential.universal.ChatColor
 import gg.essential.api.EssentialAPI
 import net.minecraft.client.gui.GuiMainMenu
-import mynameisjeff.skyblockclientupdater.utils.UpdateChecker
+import mynameisjeff.skyblockclientupdater.UpdateChecker
 import mynameisjeff.skyblockclientupdater.gui.elements.SexyButton
 import net.minecraftforge.fml.common.FMLCommonHandler
 import java.awt.Color
@@ -90,11 +90,13 @@ class UpdateSummaryScreen(
         width = 150.pixels()
         height = 20.pixels()
     }.onMouseClick {
-        UpdateChecker.ignoreUpdates();
+        UpdateChecker.ignoreUpdates()
         EssentialAPI.getGuiUtil().openScreen(GuiMainMenu())
     } childOf buttonContainer
 
     init {
+        quitButton.setFloating(true)
+        continueButton.setFloating(true)
         for (update in successfulUpdate) {
             UIText(update.second).constrain {
                 x = CenterConstraint()

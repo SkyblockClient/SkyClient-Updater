@@ -5,21 +5,11 @@ import gg.essential.elementa.components.UIContainer
 import gg.essential.elementa.components.UIText
 import gg.essential.elementa.constraints.*
 import gg.essential.elementa.dsl.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import mynameisjeff.skyblockclientupdater.SkyClientUpdater
 import mynameisjeff.skyblockclientupdater.gui.elements.ModUpdateComponent
 import mynameisjeff.skyblockclientupdater.gui.elements.SexyButton
-import mynameisjeff.skyblockclientupdater.utils.UpdateChecker
-import net.minecraft.client.gui.GuiMainMenu
+import mynameisjeff.skyblockclientupdater.UpdateChecker
 import java.awt.Color
 import java.io.File
-import java.io.FileOutputStream
-import java.io.OutputStream
-import java.net.HttpURLConnection
-import java.net.URL
-import kotlin.concurrent.thread
 
 class ModUpdateScreen(
     private val needsUpdate: HashSet<Triple<File, String, String>>
@@ -64,6 +54,8 @@ class ModUpdateScreen(
     } childOf buttonContainer
 
     init {
+        updateButton.setFloating(true)
+        exitButton.setFloating(true)
         for (update in needsUpdate) {
             ModUpdateComponent(update, updating).constrain {
                 x = CenterConstraint()
