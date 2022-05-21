@@ -17,31 +17,7 @@ data class RepoMod(
     val hasBrokenMCModInfo: Boolean = false,
     val alwaysConsider: Boolean = false,
 ) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+    override fun equals(other: Any?) = hashCode() == other.hashCode()
 
-        other as RepoMod
-
-        if (fileName != other.fileName) return false
-        if (modId != other.modId) return false
-        if (updateURL != other.updateURL) return false
-        if (!updateToIds.contentEquals(other.updateToIds)) return false
-        if (ignored != other.ignored) return false
-        if (hasBrokenMCModInfo != other.hasBrokenMCModInfo) return false
-        if (alwaysConsider != other.alwaysConsider) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = fileName.hashCode()
-        result = 31 * result + (modId?.hashCode() ?: 0)
-        result = 31 * result + updateURL.hashCode()
-        result = 31 * result + updateToIds.contentHashCode()
-        result = 31 * result + ignored.hashCode()
-        result = 31 * result + hasBrokenMCModInfo.hashCode()
-        result = 31 * result + alwaysConsider.hashCode()
-        return result
-    }
+    override fun hashCode() = ("$modId-$fileName").hashCode()
 }
