@@ -2,7 +2,6 @@ package mynameisjeff.skyblockclientupdater
 
 import gg.essential.api.EssentialAPI
 import mynameisjeff.skyblockclientupdater.gui.screens.ModUpdateScreen
-import mynameisjeff.skyblockclientupdater.utils.UpdateChecker
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.gui.GuiOptions

@@ -13,7 +13,7 @@ import gg.essential.universal.UMatrixStack
 import mynameisjeff.skyblockclientupdater.SkyClientUpdater
 import mynameisjeff.skyblockclientupdater.gui.elements.SexyButton
 import mynameisjeff.skyblockclientupdater.utils.TickTask
-import mynameisjeff.skyblockclientupdater.utils.UpdateChecker
+import mynameisjeff.skyblockclientupdater.UpdateChecker
 import net.minecraft.client.gui.GuiMainMenu
 import org.apache.logging.log4j.LogManager
 import java.awt.Color
@@ -78,6 +78,7 @@ class DownloadProgressScreen(
     } childOf buttonContainer
 
     init {
+        cancelButton.setFloating(true)
         thread(name = "SkyClient Updater Thread") {
             try {
                 val directory = File(File(SkyClientUpdater.mc.mcDataDir, "skyclientupdater"), "updates")

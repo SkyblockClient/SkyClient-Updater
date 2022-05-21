@@ -8,9 +8,11 @@
     "url": "",
     "updateUrl": "",
     "authorList": [
-      "My-Name-Is-Jeff"
+      "My-Name-Is-Jeff",
+      "nacrt",
+      "Deftu"
     ],
-    "credits": "",
+    "credits": "W-OVERFLOW for Deleter task and minor improvements.",
     "logoFile": "",
     "screenshots": [],
     "dependencies": []

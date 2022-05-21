@@ -1,7 +1,6 @@
 package mynameisjeff.skyblockclientupdater
 
 import kotlinx.serialization.json.Json
-import mynameisjeff.skyblockclientupdater.utils.UpdateChecker
 import net.minecraft.client.Minecraft
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod
@@ -20,12 +19,8 @@ import java.awt.Color
 
     val accentColor = Color(67, 184, 0)
 
-    val mc: Minecraft get() = Minecraft.getMinecraft()
-
-    /* buggy but probably more performant :blamelily:
-    val mc: Minecraft by lazy {
-        Minecraft.getMinecraft()
-    }*/
+    val mc: Minecraft
+    get() = Minecraft.getMinecraft()
 
     val json = Json {
         ignoreUnknownKeys = true
