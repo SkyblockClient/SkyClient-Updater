@@ -17,7 +17,5 @@ data class RepoMod(
     val hasBrokenMCModInfo: Boolean = false,
     val alwaysConsider: Boolean = false,
 ) {
-    override fun equals(other: Any?) = hashCode() == other.hashCode()
-
-    override fun hashCode() = ("$modId-$fileName").hashCode()
+    
 }
