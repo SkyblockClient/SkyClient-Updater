@@ -7,7 +7,7 @@ plugins {
 }
 
 archivesBaseName = "SkyblockClient-Updater"
-version = "1.2.3"
+version = "1.2.4"
 group = "mynameisjeff"
 
 java.sourceCompatibility = JavaVersion.VERSION_1_8
