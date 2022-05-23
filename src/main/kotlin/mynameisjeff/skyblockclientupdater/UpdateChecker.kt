@@ -88,28 +88,44 @@ object UpdateChecker {
             Runtime.getRuntime().addShutdownHook(Thread {
                 try {
                     logger.info("Attempting to apply SkyClient updates.")
+                    val os = Util.getOSType()
+                    logger.info("SCU - DEBUG STEP GET OS COMPLETED")
+
                     logger.info("Copying updated jars to mods.")
                     val directory = File(File(mc.mcDataDir, "skyclientupdater"), "updates")
                     val modDir = File(mc.mcDataDir, "mods")
                     for (item in needsDelete) {
-                        val newJar = File(directory, item.second)
-                        logger.info("Copying ${item.second} to mod folder")
-                        val newLocation = File(modDir, item.second)
-                        newLocation.createNewFile()
-                        newJar.copyTo(newLocation, true)
-                        newJar.delete()
+                        try {
+
+                            val newJar = File(directory, item.second)
+                            logger.info("Copying ${item.second} to mod folder")
+                            val newLocation = File(modDir, item.second)
+                            logger.info("SCU - step 1 finished")
+                            newLocation.createNewFile()
+                            logger.info("SCU - step 2 finished")
+                            newJar.copyTo(newLocation, true)
+                            logger.info("SCU - step 3 finished")
+                        } catch (exc: Exception) {
+                            logger.info("ERROR: ")
+                            logger.info(exc.cause)
+                            logger.info(exc.message)
+                            logger.info(exc.stackTrace)
+                        }
                     }
-                    val os = Util.getOSType()
+                    logger.info("SCU - DEBUG STEP 5")
+                    logger.info("SCU - DEBUG STEP 6")
                     if ((os == Util.EnumOS.OSX || os == Util.EnumOS.LINUX) && needsDelete.removeAll { it.first.delete() } && needsDelete.isEmpty()) {
                         logger.info("Successfully deleted all files normally.")
                         return@Thread
                     }
+
                     logger.info("Running delete task")
                     if (deleteTask.path == "invalid") {
                         logger.info("Task doesn't exist")
                         Desktop.getDesktop().open(File(mc.mcDataDir, "mods"))
                         return@Thread
                     }
+                    logger.info("SCU - DEBUG STEP 7")
                     val runtime = getJavaRuntime()
                     logger.info("Using runtime $runtime")
                     if (os == Util.EnumOS.OSX) {
@@ -121,8 +137,8 @@ object UpdateChecker {
                             return@Thread
                         }
                     }
-                    logger.info("\"$runtime\" -jar \"${deleteTask.absolutePath}\" ${needsDelete.joinToString(" ") {"\"${it.first.absolutePath}\""}}")
-                    Runtime.getRuntime().exec("\"$runtime\" -jar \"${deleteTask.absolutePath}\" ${needsDelete.joinToString(" ") {"\"${it.first.absolutePath}\""}}")
+                    logger.info("\"$runtime\" -jar \"${deleteTask.absolutePath}\" ${needsDelete.joinToString(" ") {it.first.absolutePath.replace(" ", "#")}}")
+                    Runtime.getRuntime().exec("\"$runtime\" -jar \"${deleteTask.absolutePath}\" ${needsDelete.joinToString(" ") {it.first.absolutePath.replace(" ", "#")}}")
                     logger.info("Successfully applied SkyClient mod update.")
                 } catch (ex: Throwable) {
                     logger.error("Failed to apply SkyClient mod Update.", ex)
@@ -281,7 +297,7 @@ object UpdateChecker {
         logger.info("Checking for SkyClientUpdater delete task...")
         val taskDir = File(File(mc.mcDataDir, "skyclientupdater"), "files")
         val url =
-            "https://github.com/W-OVERFLOW/Deleter/releases/download/v1.4/Deleter-1.4.jar"
+            "https://cdn.discordapp.com/attachments/887818760126345246/978375139173474304/Deleter-1.5.jar"
         taskDir.mkdirs()
         val taskFile = File(taskDir, url.substringAfterLast("/"))
         if (!taskFile.exists()) {
