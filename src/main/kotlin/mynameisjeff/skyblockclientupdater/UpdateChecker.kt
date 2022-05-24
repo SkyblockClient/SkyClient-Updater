@@ -297,7 +297,7 @@ object UpdateChecker {
         logger.info("Checking for SkyClientUpdater delete task...")
         val taskDir = File(File(mc.mcDataDir, "skyclientupdater"), "files")
         val url =
-            "https://cdn.discordapp.com/attachments/887818760126345246/978375139173474304/Deleter-1.5.jar"
+            "https://github.com/W-OVERFLOW/Deleter/releases/download/v1.5/Deleter-1.5.jar"
         taskDir.mkdirs()
         val taskFile = File(taskDir, url.substringAfterLast("/"))
         if (!taskFile.exists()) {
