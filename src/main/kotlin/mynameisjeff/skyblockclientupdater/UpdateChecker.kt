@@ -137,8 +137,10 @@ object UpdateChecker {
                             return@Thread
                         }
                     }
-                    logger.info("\"$runtime\" -jar \"${deleteTask.absolutePath}\" ${needsDelete.joinToString(" ") {it.first.absolutePath.replace(" ", "#")}}")
-                    Runtime.getRuntime().exec("\"$runtime\" -jar \"${deleteTask.absolutePath}\" ${needsDelete.joinToString(" ") {it.first.absolutePath.replace(" ", "#")}}")
+                    val list = arrayListOf<String>(runtime, "-jar", deleteTask.absolutePath)
+                    list.addAll(needsDelete.map { it.first.absolutePath })
+                    logger.info(list.joinToString(" "))
+                    Runtime.getRuntime().exec(list.toTypedArray())
                     logger.info("Successfully applied SkyClient mod update.")
                 } catch (ex: Throwable) {
                     logger.error("Failed to apply SkyClient mod Update.", ex)
@@ -297,7 +299,7 @@ object UpdateChecker {
         logger.info("Checking for SkyClientUpdater delete task...")
         val taskDir = File(File(mc.mcDataDir, "skyclientupdater"), "files")
         val url =
-            "https://github.com/W-OVERFLOW/Deleter/releases/download/v1.5/Deleter-1.5.jar"
+            "https://github.com/W-OVERFLOW/Deleter/releases/download/v1.6/Deleter-1.6.jar"
         taskDir.mkdirs()
         val taskFile = File(taskDir, url.substringAfterLast("/"))
         if (!taskFile.exists()) {
