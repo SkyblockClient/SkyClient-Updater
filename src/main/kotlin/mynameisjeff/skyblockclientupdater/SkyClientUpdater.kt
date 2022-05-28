@@ -15,7 +15,7 @@ import java.awt.Color
     clientSideOnly = true,
     modLanguageAdapter = "gg.essential.api.utils.KotlinAdapter"
 ) object SkyClientUpdater {
-    const val VERSION = "@VERSION@"
+    const val VERSION = "1.2.5"
 
     val accentColor = Color(67, 184, 0)
 
