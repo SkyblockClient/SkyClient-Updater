@@ -299,7 +299,7 @@ object UpdateChecker {
         logger.info("Checking for SkyClientUpdater delete task...")
         val taskDir = File(File(mc.mcDataDir, "skyclientupdater"), "files")
         val url =
-            "https://github.com/W-OVERFLOW/Deleter/releases/download/v1.6/Deleter-1.6.jar"
+            "https://github.com/nacrt/Deleter/releases/download/v1.7/Deleter-1.7.jar"
         taskDir.mkdirs()
         val taskFile = File(taskDir, url.substringAfterLast("/"))
         if (!taskFile.exists()) {
