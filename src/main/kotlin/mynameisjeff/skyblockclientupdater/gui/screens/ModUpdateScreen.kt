@@ -23,7 +23,7 @@ class ModUpdateScreen(
         y = CenterConstraint()
     }.setTextScale(1.25f.pixels()) childOf headerContainer
 
-    private val updateScroller = ScrollComponent("There are no updates... How are you seeing this menu?!").constrain {
+    private val updateScroller = ScrollComponent("There are no new updates. :)").constrain {
         width = RelativeConstraint()
         height = RelativeConstraint()
     } childOf contentContainer
