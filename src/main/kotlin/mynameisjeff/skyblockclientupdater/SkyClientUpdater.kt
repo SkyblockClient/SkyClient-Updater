@@ -1,6 +1,8 @@
 package mynameisjeff.skyblockclientupdater
 
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.modules.serializersModuleOf
+import mynameisjeff.skyblockclientupdater.data.FileSerializer
 import net.minecraft.client.Minecraft
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod
@@ -15,7 +17,7 @@ import java.awt.Color
     clientSideOnly = true,
     modLanguageAdapter = "gg.essential.api.utils.KotlinAdapter"
 ) object SkyClientUpdater {
-    const val VERSION = "1.2.6"
+    const val VERSION = "1.2.7"
 
     val accentColor = Color(67, 184, 0)
 
@@ -23,6 +25,7 @@ import java.awt.Color
     get() = Minecraft.getMinecraft()
 
     val json = Json {
+        serializersModule = serializersModuleOf(FileSerializer())
         ignoreUnknownKeys = true
     }
 

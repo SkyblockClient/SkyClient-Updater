@@ -3,16 +3,21 @@ package mynameisjeff.skyblockclientupdater.gui.screens
 import gg.essential.elementa.components.ScrollComponent
 import gg.essential.elementa.components.UIContainer
 import gg.essential.elementa.components.UIText
-import gg.essential.elementa.constraints.*
-import gg.essential.elementa.dsl.*
+import gg.essential.elementa.constraints.CenterConstraint
+import gg.essential.elementa.constraints.ChildBasedSizeConstraint
+import gg.essential.elementa.constraints.RelativeConstraint
+import gg.essential.elementa.constraints.SiblingConstraint
+import gg.essential.elementa.dsl.childOf
+import gg.essential.elementa.dsl.constrain
+import gg.essential.elementa.dsl.pixels
+import mynameisjeff.skyblockclientupdater.UpdateChecker
+import mynameisjeff.skyblockclientupdater.data.UpdateMod
 import mynameisjeff.skyblockclientupdater.gui.elements.ModUpdateComponent
 import mynameisjeff.skyblockclientupdater.gui.elements.SexyButton
-import mynameisjeff.skyblockclientupdater.UpdateChecker
 import java.awt.Color
-import java.io.File
 
 class ModUpdateScreen(
-    private val needsUpdate: HashSet<Triple<File, String, String>>
+    private val needsUpdate: HashSet<UpdateMod>
 ) : BaseScreen(
     useContentContainer = true
 ) {
@@ -38,7 +43,7 @@ class ModUpdateScreen(
         width = 150.pixels()
         height = 20.pixels()
     }.onMouseClick {
-        displayScreen(DownloadProgressScreen(updating as HashSet<Triple<File, String, String>>))
+        displayScreen(DownloadProgressScreen(updating as HashSet<UpdateMod>))
     } childOf buttonContainer
     val exitButton = SexyButton(
         text = "Main Menu",

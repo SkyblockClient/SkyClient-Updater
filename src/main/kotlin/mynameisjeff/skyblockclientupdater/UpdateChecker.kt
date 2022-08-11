@@ -5,13 +5,16 @@ import gg.essential.api.EssentialAPI
 import gg.essential.api.utils.Multithreading
 import gg.essential.api.utils.WebUtil
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.serializer
 import mynameisjeff.skyblockclientupdater.SkyClientUpdater.json
 import mynameisjeff.skyblockclientupdater.SkyClientUpdater.mc
 import mynameisjeff.skyblockclientupdater.data.LocalMod
 import mynameisjeff.skyblockclientupdater.data.MCMod
 import mynameisjeff.skyblockclientupdater.data.RepoMod
+import mynameisjeff.skyblockclientupdater.data.UpdateMod
 import mynameisjeff.skyblockclientupdater.gui.screens.ModUpdateScreen
 import mynameisjeff.skyblockclientupdater.utils.TickTask
 import mynameisjeff.skyblockclientupdater.utils.readTextAndClose
@@ -40,7 +43,11 @@ object UpdateChecker {
 
     val installedMods = arrayListOf<LocalMod>()
     val latestMods = hashSetOf<RepoMod>()
-    val needsUpdate = hashSetOf<Triple<File, String, String>>()
+    val needsUpdate = hashSetOf<UpdateMod>()
+
+    val taskDir = File(File(mc.mcDataDir, "skyclientupdater"), "files")
+    val ignoredJson = File(taskDir, "ignored.json")
+    val ignored = arrayListOf<UpdateMod>()
 
     val needsDelete = hashSetOf<Pair<File, String>>()
 
@@ -189,6 +196,7 @@ object UpdateChecker {
         }
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     fun getUpdateCandidates() {
         val checkedMods = ArrayList<String>()
 
@@ -202,7 +210,7 @@ object UpdateChecker {
                         // get the update to mod
                         val updateToRepoMod = getRepoModFromID(latestMods, updateToId)
                         if (updateToRepoMod != null) {
-                            needsUpdate.add(Triple(localMod.file, updateToRepoMod.fileName, updateToRepoMod.updateURL))
+                            needsUpdate.add(UpdateMod(localMod.file, updateToRepoMod.fileName, updateToRepoMod.updateURL, UpdateMod.Type.UPDATING))
                         }
                     }
                 }
@@ -223,7 +231,7 @@ object UpdateChecker {
                 {
                     checkedMods.add(localMod.file.name)
                     if (checkNeedsUpdate(repoMod.fileName, fileName)) {
-                        needsUpdate.add(Triple(localMod.file, repoMod.fileName, repoMod.updateURL))
+                        needsUpdate.add(UpdateMod(localMod.file, repoMod.fileName, repoMod.updateURL, UpdateMod.Type.UPDATING))
                         continue@loopMods
                     }
                 }
@@ -241,12 +249,39 @@ object UpdateChecker {
                     checkedMods.add(localMod.file.name)
                     if (checkNeedsUpdate(repoMod.fileName, fileName))
                     {
-                        needsUpdate.add(Triple(localMod.file, repoMod.fileName, repoMod.updateURL))
+                        needsUpdate.add(UpdateMod(localMod.file, repoMod.fileName, repoMod.updateURL, UpdateMod.Type.UPDATING))
                         continue@loopMods
                     }
                 }
             }
         }
+        try {
+            if (!ignoredJson.exists()) {
+                ignoredJson.createNewFile()
+                ignoredJson.writeText("[]")
+            } else {
+                ignoredJson.inputStream().use { inputStream ->
+                    ignored.addAll(json.decodeFromStream<List<UpdateMod>>(inputStream))
+                    ignored.forEach { removed ->
+                        needsUpdate.removeIf { removed == it }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            try {
+                ignoredJson.delete()
+                ignoredJson.createNewFile()
+                ignoredJson.writeText("[]")
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun writeIgnoredJson() {
+        ignored.removeIf { run { println(it); false } && it.type != UpdateMod.Type.DISABLE }
+        ignoredJson.writeText(json.encodeToString(ListSerializer(json.serializersModule.serializer()), ignored))
     }
 
     private fun getRepoModFromID(repoModList: HashSet<RepoMod>, modId: String): RepoMod? {
@@ -297,7 +332,6 @@ object UpdateChecker {
 
     fun downloadHelperTask() {
         logger.info("Checking for SkyClientUpdater delete task...")
-        val taskDir = File(File(mc.mcDataDir, "skyclientupdater"), "files")
         val url =
             "https://github.com/Polyfrost/Deleter/releases/download/v1.8/Deleter-1.8.jar"
         taskDir.mkdirs()
