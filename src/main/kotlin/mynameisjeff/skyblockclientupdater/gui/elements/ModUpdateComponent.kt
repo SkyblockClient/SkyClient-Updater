@@ -6,17 +6,22 @@ import gg.essential.elementa.components.UIText
 import gg.essential.elementa.constraints.ChildBasedSizeConstraint
 import gg.essential.elementa.constraints.SiblingConstraint
 import gg.essential.elementa.constraints.animation.Animations
-import gg.essential.elementa.dsl.*
+import gg.essential.elementa.dsl.animate
+import gg.essential.elementa.dsl.childOf
+import gg.essential.elementa.dsl.constrain
+import gg.essential.elementa.dsl.toConstraint
 import gg.essential.universal.ChatColor
 import mynameisjeff.skyblockclientupdater.SkyClientUpdater
+import mynameisjeff.skyblockclientupdater.UpdateChecker
+import mynameisjeff.skyblockclientupdater.data.UpdateMod
 import java.awt.Color
-import java.io.File
 
 class ModUpdateComponent(
-    update: Triple<File, String, String>,
-    updating: MutableSet<Triple<File, String, String>>
+    update: UpdateMod,
+    updating: MutableSet<UpdateMod>
 ) : UIComponent() {
-    val oldFileText = UIText(update.first.name).constrain {
+
+    val oldFileText = UIText(update.file.name).constrain {
         color = Color(179, 0, 0).toConstraint()
     } childOf this
     val seperatorContainer = UIContainer().constrain {
@@ -25,7 +30,7 @@ class ModUpdateComponent(
     val seperatorText = UIText("${ChatColor.BOLD}\u279C").constrain {
         color = Color(66, 245, 93).toConstraint()
     } childOf seperatorContainer
-    val newFileText = UIText("${ChatColor.GREEN}${update.second}").constrain {
+    val newFileText = UIText("${ChatColor.GREEN}${update.name}").constrain {
         x = SiblingConstraint(2f)
         color = SkyClientUpdater.accentColor.toConstraint()
     } childOf this
@@ -40,14 +45,28 @@ class ModUpdateComponent(
             width = ChildBasedSizeConstraint()
             height = newFileText.constraints.height
         }.onMouseClick {
-            if (updating.contains(update)) {
-                seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(245, 66, 66).toConstraint()) }
-                newFileText.setText("${ChatColor.GREEN}${ChatColor.STRIKETHROUGH}${update.second}")
-                updating.remove(update)
-            } else {
-                seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(66, 245, 93).toConstraint()) }
-                newFileText.setText("${ChatColor.GREEN}${update.second}")
-                updating.add(update)
+            when (update.type) {
+                UpdateMod.Type.UPDATING -> {
+                    update.type = UpdateMod.Type.TEMP_DISABLE
+                    seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(245, 99, 99).toConstraint()) }
+                    newFileText.setText("${ChatColor.GREEN}${ChatColor.STRIKETHROUGH}${update.name}")
+                    updating.remove(update)
+                }
+                UpdateMod.Type.TEMP_DISABLE -> {
+                    update.type = UpdateMod.Type.DISABLE
+                    seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(245, 66, 66).toConstraint()) }
+                    newFileText.setText("${ChatColor.RED}${ChatColor.STRIKETHROUGH}${update.name}")
+                    UpdateChecker.ignored.add(update)
+                    UpdateChecker.writeIgnoredJson()
+                }
+                UpdateMod.Type.DISABLE -> {
+                    update.type = UpdateMod.Type.UPDATING
+                    seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(66, 245, 93).toConstraint()) }
+                    newFileText.setText("${ChatColor.GREEN}${update.name}")
+                    updating.add(update)
+                    UpdateChecker.ignored.remove(update)
+                    UpdateChecker.writeIgnoredJson()
+                }
             }
         }
     }

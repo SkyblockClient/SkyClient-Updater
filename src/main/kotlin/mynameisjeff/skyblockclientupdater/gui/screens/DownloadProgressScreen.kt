@@ -14,6 +14,7 @@ import mynameisjeff.skyblockclientupdater.SkyClientUpdater
 import mynameisjeff.skyblockclientupdater.gui.elements.SexyButton
 import mynameisjeff.skyblockclientupdater.utils.TickTask
 import mynameisjeff.skyblockclientupdater.UpdateChecker
+import mynameisjeff.skyblockclientupdater.data.UpdateMod
 import net.minecraft.client.gui.GuiMainMenu
 import org.apache.logging.log4j.LogManager
 import java.awt.Color
@@ -25,12 +26,12 @@ import java.net.URL
 import kotlin.concurrent.thread
 
 class DownloadProgressScreen(
-    private val updating: HashSet<Triple<File, String, String>>
+    private val updating: HashSet<UpdateMod>
 ) : BaseScreen(
     useContentContainer = true
 ) {
-    private val successfullyUpdated = mutableSetOf<Triple<File, String, String>>()
-    private val failedUpdated = mutableSetOf<Triple<File, String, String>>()
+    private val successfullyUpdated = mutableSetOf<UpdateMod>()
+    private val failedUpdated = mutableSetOf<UpdateMod>()
 
     private var exited = false
 
@@ -84,11 +85,11 @@ class DownloadProgressScreen(
                 val directory = File(File(SkyClientUpdater.mc.mcDataDir, "skyclientupdater"), "updates")
                 directory.mkdirs()
                 for (update in updating) {
-                    val jarName = update.second
+                    val jarName = update.name
                     val file = File(directory, jarName)
                     downloadUpdate(update, file)
                     if (!failedUpdated.contains(update)) {
-                        UpdateChecker.deleteFileOnShutdown(update.first, jarName)
+                        UpdateChecker.deleteFileOnShutdown(update.file, jarName)
                         successfullyUpdated.add(update)
                     }
                 }
@@ -98,14 +99,14 @@ class DownloadProgressScreen(
         }
     }
 
-    private fun downloadUpdate(update: Triple<File, String, String>, file: File) {
+    private fun downloadUpdate(update: UpdateMod, file: File) {
         try {
-            currentlyUpdatingText.setText(update.second)
+            currentlyUpdatingText.setText(update.name)
             val logger = LogManager.getLogger("SkyClientUpdater (Update Downloader)")
             progressBar.constrain {
                 width = 0.pixels()
             }
-            val st = URL(update.third).openConnection() as HttpURLConnection
+            val st = URL(update.updateURL).openConnection() as HttpURLConnection
             st.setRequestProperty(
                 "User-Agent",
                 "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2"
@@ -113,13 +114,13 @@ class DownloadProgressScreen(
             st.connect()
             if (st.responseCode != HttpURLConnection.HTTP_OK) {
                 failedUpdated.add(update)
-                logger.error(update.third + " returned status code " + st.responseCode)
+                logger.error(update.updateURL + " returned status code " + st.responseCode)
                 return
             }
-            update.first.parentFile.mkdirs()
-            if (!update.first.exists() && !update.first.createNewFile()) {
+            update.file.parentFile.mkdirs()
+            if (!update.file.exists() && !update.file.createNewFile()) {
                 failedUpdated.add(update)
-                logger.error("Couldn't create update directory/file for ${update.second}.")
+                logger.error("Couldn't create update directory/file for ${update.name}.")
                 return
             }
 
@@ -181,8 +182,8 @@ class DownloadProgressScreen(
                 TickTask(5) {
                     displayScreen(
                         UpdateSummaryScreen(
-                            successfullyUpdated as HashSet<Triple<File, String, String>>,
-                            failedUpdated as HashSet<Triple<File, String, String>>
+                            successfullyUpdated as HashSet<UpdateMod>,
+                            failedUpdated as HashSet<UpdateMod>
                         )
                     )
                 }

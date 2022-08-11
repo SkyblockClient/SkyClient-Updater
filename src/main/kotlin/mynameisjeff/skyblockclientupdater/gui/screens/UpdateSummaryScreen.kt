@@ -1,5 +1,6 @@
 package mynameisjeff.skyblockclientupdater.gui.screens
 
+import gg.essential.api.EssentialAPI
 import gg.essential.elementa.components.ScrollComponent
 import gg.essential.elementa.components.UIBlock
 import gg.essential.elementa.components.UIContainer
@@ -10,17 +11,16 @@ import gg.essential.elementa.constraints.RelativeConstraint
 import gg.essential.elementa.constraints.SiblingConstraint
 import gg.essential.elementa.dsl.*
 import gg.essential.universal.ChatColor
-import gg.essential.api.EssentialAPI
-import net.minecraft.client.gui.GuiMainMenu
 import mynameisjeff.skyblockclientupdater.UpdateChecker
+import mynameisjeff.skyblockclientupdater.data.UpdateMod
 import mynameisjeff.skyblockclientupdater.gui.elements.SexyButton
+import net.minecraft.client.gui.GuiMainMenu
 import net.minecraftforge.fml.common.FMLCommonHandler
 import java.awt.Color
-import java.io.File
 
 class UpdateSummaryScreen(
-    private val successfulUpdate: HashSet<Triple<File, String, String>>,
-    private val failedUpdate: HashSet<Triple<File, String, String>>
+    private val successfulUpdate: HashSet<UpdateMod>,
+    private val failedUpdate: HashSet<UpdateMod>
 ): BaseScreen(
     useContentContainer = true
 ) {
@@ -98,14 +98,14 @@ class UpdateSummaryScreen(
         quitButton.setFloating(true)
         continueButton.setFloating(true)
         for (update in successfulUpdate) {
-            UIText(update.second).constrain {
+            UIText(update.name).constrain {
                 x = CenterConstraint()
                 y = if (successfulUpdate.indexOf(update) == 0) 2.pixels() else SiblingConstraint(2f)
             } childOf successfulList
         }
 
         for (update in failedUpdate) {
-            UIText(update.second).constrain {
+            UIText(update.name).constrain {
                 x = CenterConstraint()
                 y = if (failedUpdate.indexOf(update) == 0) 2.pixels() else SiblingConstraint(2f)
             } childOf failedList
