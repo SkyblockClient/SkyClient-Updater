@@ -21,6 +21,7 @@ import mynameisjeff.skyblockclientupdater.utils.readTextAndClose
 import net.minecraft.client.gui.GuiMainMenu
 import net.minecraft.util.Util
 import net.minecraftforge.client.event.GuiOpenEvent
+import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.client.FMLClientHandler
 import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.ModContainer
@@ -38,25 +39,41 @@ import java.util.jar.JarFile
  * Modified
  * https://github.com/Skytils/SkytilsMod/blob/1.x/LICENSE
  */
-object UpdateChecker {
-    private val logger = LogManager.getLogger("SkyClientUpdater (UpdateChecker)")
+class UpdateChecker {
+    companion object {
+        var INSTANCE = UpdateChecker()
+        private set
 
-    val installedMods = arrayListOf<LocalMod>()
+        private val logger = LogManager.getLogger("SkyClientUpdater (UpdateChecker)")
+
+        val installedMods = arrayListOf<LocalMod>()
+
+        val taskDir = File(File(mc.mcDataDir, "skyclientupdater"), "files")
+        val ignoredJson = File(taskDir, "ignored.json")
+
+        val needsDelete = hashSetOf<Pair<File, String>>()
+
+        private var addedShutdownHook = false
+
+        lateinit var deleteTask: File
+
+        fun reset() {
+            MinecraftForge.EVENT_BUS.unregister(INSTANCE)
+            INSTANCE = UpdateChecker()
+            MinecraftForge.EVENT_BUS.register(INSTANCE)
+            INSTANCE.updateLatestCommitId()
+            INSTANCE.getLatestMods()
+            INSTANCE.getUpdateCandidates()
+        }
+    }
+
     val latestMods = hashSetOf<RepoMod>()
     val needsUpdate = hashSetOf<UpdateMod>()
 
-    val taskDir = File(File(mc.mcDataDir, "skyclientupdater"), "files")
-    val ignoredJson = File(taskDir, "ignored.json")
     val ignored = arrayListOf<UpdateMod>()
-
-    val needsDelete = hashSetOf<Pair<File, String>>()
 
     var latestCommitId = "main"
     private var ignoreUpdates = false
-
-    private var addedShutdownHook = false
-
-    lateinit var deleteTask: File
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onGuiOpened(event: GuiOpenEvent) {
@@ -280,7 +297,7 @@ object UpdateChecker {
     }
 
     fun writeIgnoredJson() {
-        ignored.removeIf { run { println(it); false } && it.type != UpdateMod.Type.DISABLE }
+        ignored.removeIf { it.type != UpdateMod.Type.DISABLE }
         ignoredJson.writeText(json.encodeToString(ListSerializer(json.serializersModule.serializer()), ignored))
     }
 

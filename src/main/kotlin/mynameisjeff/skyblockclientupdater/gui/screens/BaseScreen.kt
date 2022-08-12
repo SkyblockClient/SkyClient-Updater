@@ -10,15 +10,28 @@ import gg.essential.elementa.constraints.SiblingConstraint
 import gg.essential.elementa.dsl.childOf
 import gg.essential.elementa.dsl.constrain
 import gg.essential.elementa.dsl.percent
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiScreen
 import java.awt.Color
 
 abstract class BaseScreen(
     val useContentContainer: Boolean
 ) : WindowScreen(
-    version = ElementaVersion.V1,
+    version = ElementaVersion.V2,
     drawDefaultBackground = false,
     restoreCurrentGuiOnClose = true
 ) {
+    companion object {
+        var lastNonSCUScreen: GuiScreen? = null
+        private set
+    }
+    init {
+        Minecraft.getMinecraft().currentScreen.let {
+            if (it !is BaseScreen) {
+                lastNonSCUScreen = it
+            }
+        }
+    }
     private val background = UIBlock(Color(31, 31, 31)).constrain {
         width = RelativeConstraint()
         height = RelativeConstraint()

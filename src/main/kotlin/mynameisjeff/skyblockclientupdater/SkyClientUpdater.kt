@@ -2,6 +2,8 @@ package mynameisjeff.skyblockclientupdater
 
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.serializersModuleOf
+import mynameisjeff.skyblockclientupdater.command.Command
+import mynameisjeff.skyblockclientupdater.config.Config
 import mynameisjeff.skyblockclientupdater.data.FileSerializer
 import net.minecraft.client.Minecraft
 import net.minecraftforge.common.MinecraftForge
@@ -17,7 +19,7 @@ import java.awt.Color
     clientSideOnly = true,
     modLanguageAdapter = "gg.essential.api.utils.KotlinAdapter"
 ) object SkyClientUpdater {
-    const val VERSION = "1.2.7"
+    const val VERSION = "1.3.0"
 
     val accentColor = Color(67, 184, 0)
 
@@ -32,19 +34,21 @@ import java.awt.Color
     @Mod.EventHandler
     fun on(event: FMLPreInitializationEvent) {
         MinecraftForge.EVENT_BUS.register(EventListener())
-        MinecraftForge.EVENT_BUS.register(UpdateChecker)
+        MinecraftForge.EVENT_BUS.register(UpdateChecker.INSTANCE)
+        Command.register()
+        Config.preload()
 
         val progress = ProgressManager.push("SkyClient Updater", 5)
         progress.step("Downloading helper utility")
-        UpdateChecker.downloadHelperTask()
+        UpdateChecker.INSTANCE.downloadHelperTask()
         progress.step("Discovering mods")
-        UpdateChecker.getValidModFiles()
+        UpdateChecker.INSTANCE.getValidModFiles()
         progress.step("Fetching latest commit ID")
-        UpdateChecker.updateLatestCommitId()
+        UpdateChecker.INSTANCE.updateLatestCommitId()
         progress.step("Fetching latest versions")
-        UpdateChecker.getLatestMods()
+        UpdateChecker.INSTANCE.getLatestMods()
         progress.step("Comparing versions")
-        UpdateChecker.getUpdateCandidates()
+        UpdateChecker.INSTANCE.getUpdateCandidates()
         ProgressManager.pop(progress)
     }
 

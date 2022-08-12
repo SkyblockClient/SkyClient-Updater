@@ -1,7 +1,7 @@
 package mynameisjeff.skyblockclientupdater.gui.elements
 
-import gg.essential.elementa.UIComponent
 import gg.essential.elementa.components.UIBlock
+import gg.essential.elementa.components.UIContainer
 import gg.essential.elementa.components.UIText
 import gg.essential.elementa.constraints.CenterConstraint
 import gg.essential.elementa.constraints.RelativeConstraint
@@ -19,7 +19,7 @@ class SexyButton(
     outlineColor: Color = SkyClientUpdater.accentColor,
     primary: Boolean = true,
     playClickSound: Boolean = true
-) : UIComponent() {
+) : UIContainer() {
     private val background = UIBlock(if (primary) Color(15, 15, 15) else Color(21, 21, 21)).constrain {
         width = RelativeConstraint()
         height = RelativeConstraint()
