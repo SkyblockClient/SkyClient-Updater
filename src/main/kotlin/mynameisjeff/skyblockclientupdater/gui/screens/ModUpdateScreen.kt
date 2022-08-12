@@ -54,7 +54,7 @@ class ModUpdateScreen(
         height = 20.pixels()
         x = SiblingConstraint(7.5f)
     }.onMouseClick {
-        UpdateChecker.ignoreUpdates()
+        UpdateChecker.INSTANCE.ignoreUpdates()
         restorePreviousScreen()
     } childOf buttonContainer
 

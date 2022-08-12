@@ -1,6 +1,5 @@
 package mynameisjeff.skyblockclientupdater.gui.elements
 
-import gg.essential.elementa.UIComponent
 import gg.essential.elementa.components.UIContainer
 import gg.essential.elementa.components.UIText
 import gg.essential.elementa.constraints.ChildBasedSizeConstraint
@@ -19,7 +18,7 @@ import java.awt.Color
 class ModUpdateComponent(
     update: UpdateMod,
     updating: MutableSet<UpdateMod>
-) : UIComponent() {
+) : UIContainer() {
 
     val oldFileText = UIText(update.file.name).constrain {
         color = Color(179, 0, 0).toConstraint()
@@ -56,16 +55,16 @@ class ModUpdateComponent(
                     update.type = UpdateMod.Type.DISABLE
                     seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(245, 66, 66).toConstraint()) }
                     newFileText.setText("${ChatColor.RED}${ChatColor.STRIKETHROUGH}${update.name}")
-                    UpdateChecker.ignored.add(update)
-                    UpdateChecker.writeIgnoredJson()
+                    UpdateChecker.INSTANCE.ignored.add(update)
+                    UpdateChecker.INSTANCE.writeIgnoredJson()
                 }
                 UpdateMod.Type.DISABLE -> {
                     update.type = UpdateMod.Type.UPDATING
                     seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(66, 245, 93).toConstraint()) }
                     newFileText.setText("${ChatColor.GREEN}${update.name}")
                     updating.add(update)
-                    UpdateChecker.ignored.remove(update)
-                    UpdateChecker.writeIgnoredJson()
+                    UpdateChecker.INSTANCE.ignored.remove(update)
+                    UpdateChecker.INSTANCE.writeIgnoredJson()
                 }
             }
         }

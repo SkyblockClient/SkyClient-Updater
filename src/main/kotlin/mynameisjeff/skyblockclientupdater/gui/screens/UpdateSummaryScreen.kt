@@ -14,7 +14,6 @@ import gg.essential.universal.ChatColor
 import mynameisjeff.skyblockclientupdater.UpdateChecker
 import mynameisjeff.skyblockclientupdater.data.UpdateMod
 import mynameisjeff.skyblockclientupdater.gui.elements.SexyButton
-import net.minecraft.client.gui.GuiMainMenu
 import net.minecraftforge.fml.common.FMLCommonHandler
 import java.awt.Color
 
@@ -90,8 +89,8 @@ class UpdateSummaryScreen(
         width = 150.pixels()
         height = 20.pixels()
     }.onMouseClick {
-        UpdateChecker.ignoreUpdates()
-        EssentialAPI.getGuiUtil().openScreen(GuiMainMenu())
+        UpdateChecker.INSTANCE.ignoreUpdates()
+        EssentialAPI.getGuiUtil().openScreen(lastNonSCUScreen)
     } childOf buttonContainer
 
     init {

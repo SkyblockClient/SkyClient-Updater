@@ -89,7 +89,7 @@ class DownloadProgressScreen(
                     val file = File(directory, jarName)
                     downloadUpdate(update, file)
                     if (!failedUpdated.contains(update)) {
-                        UpdateChecker.deleteFileOnShutdown(update.file, jarName)
+                        UpdateChecker.INSTANCE.deleteFileOnShutdown(update.file, jarName)
                         successfullyUpdated.add(update)
                     }
                 }
