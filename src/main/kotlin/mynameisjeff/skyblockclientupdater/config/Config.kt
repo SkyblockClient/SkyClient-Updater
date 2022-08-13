@@ -40,4 +40,8 @@ object Config : Vigilant(File(UpdateChecker.taskDir, "config.toml"), "SkyClient 
         UpdateChecker.ignoredJson.delete()
         checkForUpdates()
     }
+
+    init {
+        initialize()
+    }
 }
