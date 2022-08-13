@@ -48,13 +48,13 @@ class ModUpdateComponent(
                 UpdateMod.Type.UPDATING -> {
                     update.type = UpdateMod.Type.TEMP_DISABLE
                     seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(245, 99, 99).toConstraint()) }
-                    newFileText.setText("${ChatColor.GREEN}${ChatColor.STRIKETHROUGH}${update.name}")
+                    newFileText.setText("skip: ${ChatColor.GREEN}${ChatColor.STRIKETHROUGH}${update.name}")
                     updating.remove(update)
                 }
                 UpdateMod.Type.TEMP_DISABLE -> {
                     update.type = UpdateMod.Type.DISABLE
                     seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(245, 66, 66).toConstraint()) }
-                    newFileText.setText("${ChatColor.RED}${ChatColor.STRIKETHROUGH}${update.name}")
+                    newFileText.setText("perm disabled: ${ChatColor.RED}${ChatColor.STRIKETHROUGH}${update.name}")
                     UpdateChecker.INSTANCE.ignored.add(update)
                     UpdateChecker.INSTANCE.writeIgnoredJson()
                 }
@@ -65,6 +65,36 @@ class ModUpdateComponent(
                     updating.add(update)
                     UpdateChecker.INSTANCE.ignored.remove(update)
                     UpdateChecker.INSTANCE.writeIgnoredJson()
+                }
+            }
+        }.onMouseEnter {
+            when (update.type) {
+                UpdateMod.Type.UPDATING -> {
+                    seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(245, 99, 99).toConstraint()) }
+                    newFileText.setText("skip: ${ChatColor.GREEN}${ChatColor.STRIKETHROUGH}${update.name}")
+                }
+                UpdateMod.Type.TEMP_DISABLE -> {
+                    seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(245, 66, 66).toConstraint()) }
+                    newFileText.setText("perm disabled: ${ChatColor.RED}${ChatColor.STRIKETHROUGH}${update.name}")
+                }
+                UpdateMod.Type.DISABLE -> {
+                    seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(66, 245, 93).toConstraint()) }
+                    newFileText.setText("${ChatColor.GREEN}${update.name}")
+                }
+            }
+        }.onMouseLeave {
+            when (update.type) {
+                UpdateMod.Type.UPDATING -> {
+                    seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(66, 245, 93).toConstraint()) }
+                    newFileText.setText("${ChatColor.GREEN}${update.name}")
+                }
+                UpdateMod.Type.TEMP_DISABLE -> {
+                    seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(245, 99, 99).toConstraint()) }
+                    newFileText.setText("skip: ${ChatColor.GREEN}${ChatColor.STRIKETHROUGH}${update.name}")
+                }
+                UpdateMod.Type.DISABLE -> {
+                    seperatorText.animate { setColorAnimation(Animations.OUT_EXP, 1f, Color(245, 66, 66).toConstraint()) }
+                    newFileText.setText("perm disabled: ${ChatColor.RED}${ChatColor.STRIKETHROUGH}${update.name}")
                 }
             }
         }
