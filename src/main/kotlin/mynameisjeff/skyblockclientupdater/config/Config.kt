@@ -18,6 +18,14 @@ object Config : Vigilant(File(UpdateChecker.taskDir, "config.toml"), "SkyClient 
     var showButtonOnEscapeMenu = true
 
     @Property(
+        type = PropertyType.SWITCH,
+        name = "Enable SkyClient Beta",
+        description = "Enable beta versions of SkyClient mods.",
+        category = "General"
+    )
+    var enableBeta = false
+
+    @Property(
         type = PropertyType.BUTTON,
         name = "Check for Updates",
         description = "Check for updates again. This might take a while after clicking this button.",
@@ -43,5 +51,12 @@ object Config : Vigilant(File(UpdateChecker.taskDir, "config.toml"), "SkyClient 
 
     init {
         initialize()
+        registerListener("enableBeta") { it: Boolean ->
+            enableBeta = it
+            UpdateChecker.reset()
+            if (UpdateChecker.INSTANCE.needsUpdate.isNotEmpty()) {
+                EssentialAPI.getGuiUtil().openScreen(ModUpdateScreen(UpdateChecker.INSTANCE.needsUpdate))
+            }
+        }
     }
 }
