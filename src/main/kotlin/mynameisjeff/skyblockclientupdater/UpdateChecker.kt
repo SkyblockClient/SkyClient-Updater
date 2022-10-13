@@ -208,10 +208,10 @@ class UpdateChecker {
 
     fun getLatestMods() {
         try {
-            latestMods.addAll(json.decodeFromString<List<RepoMod>>(WebUtil.fetchString("https://cdn.jsdelivr.net/gh/nacrt/SkyblockClient-REPO@$latestCommitId/files/mods.json") ?: throw NullPointerException()).filter { !it.ignored })
             if (Config.enableBeta) {
                 latestMods.addAll(json.decodeFromString<List<RepoMod>>(WebUtil.fetchString("https://cdn.jsdelivr.net/gh/nacrt/SkyblockClient-REPO@$latestCommitId/files/mods_beta.json") ?: run { Config.enableBeta = false; Config.markDirty(); Config.writeData(); throw UnsupportedOperationException("Beta mods not available, disabling...") }).filter { !it.ignored })
             }
+            latestMods.addAll(json.decodeFromString<List<RepoMod>>(WebUtil.fetchString("https://cdn.jsdelivr.net/gh/nacrt/SkyblockClient-REPO@$latestCommitId/files/mods.json") ?: throw NullPointerException()).filter { !it.ignored })
         } catch (ex: Throwable) {
             logger.error("Failed to load mod files.", ex)
         }
