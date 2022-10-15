@@ -28,7 +28,7 @@ class EventListener {
     fun onGuiAction(event: GuiScreenEvent.ActionPerformedEvent) {
         if (event.gui !is GuiOptions || !Config.showButtonOnEscapeMenu) return
         if (event.button.id == buttonId) EssentialAPI.getGuiUtil()
-            .openScreen(ModUpdateScreen(UpdateChecker.INSTANCE.needsUpdate))
+            .openScreen(Config.gui())
     }
 
     private fun generateButtonId(buttonList: List<GuiButton> = listOf()): Int {
