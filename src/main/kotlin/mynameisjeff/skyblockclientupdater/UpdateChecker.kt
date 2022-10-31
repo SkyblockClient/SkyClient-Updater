@@ -95,7 +95,7 @@ class UpdateChecker {
                     "https://api.github.com/repos/${
                         System.getProperty(
                             "scu.repo",
-                            "nacrt/SkyblockClient-REPO"
+                            "SkyblockClient/SkyblockClient-REPO"
                         )
                     }/commits"
                 ) ?: throw NullPointerException()
@@ -209,9 +209,9 @@ class UpdateChecker {
     fun getLatestMods() {
         try {
             if (Config.enableBeta) {
-                latestMods.addAll(json.decodeFromString<List<RepoMod>>(WebUtil.fetchString("https://cdn.jsdelivr.net/gh/nacrt/SkyblockClient-REPO@$latestCommitId/files/mods_beta.json") ?: run { Config.enableBeta = false; Config.markDirty(); Config.writeData(); throw UnsupportedOperationException("Beta mods not available, disabling...") }).filter { !it.ignored })
+                latestMods.addAll(json.decodeFromString<List<RepoMod>>(WebUtil.fetchString("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods_beta.json") ?: run { Config.enableBeta = false; Config.markDirty(); Config.writeData(); throw UnsupportedOperationException("Beta mods not available, disabling...") }).filter { !it.ignored })
             }
-            latestMods.addAll(json.decodeFromString<List<RepoMod>>(WebUtil.fetchString("https://cdn.jsdelivr.net/gh/nacrt/SkyblockClient-REPO@$latestCommitId/files/mods.json") ?: throw NullPointerException()).filter { !it.ignored })
+            latestMods.addAll(json.decodeFromString<List<RepoMod>>(WebUtil.fetchString("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods.json") ?: throw NullPointerException()).filter { !it.ignored })
         } catch (ex: Throwable) {
             logger.error("Failed to load mod files.", ex)
         }
@@ -243,8 +243,8 @@ class UpdateChecker {
 
 
         // mod id checking loop
-        loopMods@ for (localMod in localModsList) {
-            if (localMod.modIds.isNotEmpty() && checkedMods.contains(localMod.modIds.first().toString()))
+        loopMods@ for (localMod in localModsList.toTypedArray()) {
+            if ((localMod.modIds.isNotEmpty() && checkedMods.contains(localMod.modIds.first().toString())) || localMod.matched)
                 continue@loopMods
             val fileName = localMod.file.name
             for (repoMod in repoModList) {
@@ -252,7 +252,18 @@ class UpdateChecker {
                 {
                     checkedMods.add(localMod.file.name)
                     if (checkNeedsUpdate(repoMod.fileName, fileName)) {
-                        needsUpdate.add(UpdateMod(localMod.file, repoMod.fileName, repoMod.updateURL, UpdateMod.Type.UPDATING))
+                        if (repoMod.fileName == "OverflowAnimations-1.1.0.jar") { //todo i should generalize this lol
+                            needsUpdate.add(UpdateMod(localMod.file, repoMod.fileName, repoMod.updateURL, UpdateMod.Type.UPDATING))
+                            val sk1er = repoModList.find { it.modId == "sk1er_old_animations" }
+                            if (sk1er != null) {
+                                needsUpdate.add(UpdateMod(localMod.file, sk1er.fileName, sk1er.updateURL, UpdateMod.Type.UPDATING))
+                            }
+                            localMod.matched = true
+                            continue@loopMods
+                        }
+                        if (needsUpdate.add(UpdateMod(localMod.file, repoMod.fileName, repoMod.updateURL, UpdateMod.Type.UPDATING))) {
+                            localMod.matched = true
+                        }
                         continue@loopMods
                     }
                 }
@@ -261,7 +272,7 @@ class UpdateChecker {
 
         // file name checking loop
         loopMods@ for (localMod in localModsList) {
-            if (localMod.modIds.isNotEmpty() && checkedMods.contains(localMod.modIds.first().toString()))
+            if ((localMod.modIds.isNotEmpty() && checkedMods.contains(localMod.modIds.first().toString())) || localMod.matched)
                 continue@loopMods
             val fileName = localMod.file.name
             for (repoMod in repoModList) {
@@ -270,7 +281,9 @@ class UpdateChecker {
                     checkedMods.add(localMod.file.name)
                     if (checkNeedsUpdate(repoMod.fileName, fileName))
                     {
-                        needsUpdate.add(UpdateMod(localMod.file, repoMod.fileName, repoMod.updateURL, UpdateMod.Type.UPDATING))
+                        if (needsUpdate.add(UpdateMod(localMod.file, repoMod.fileName, repoMod.updateURL, UpdateMod.Type.UPDATING))) {
+                            localMod.matched = true
+                        }
                         continue@loopMods
                     }
                 }
