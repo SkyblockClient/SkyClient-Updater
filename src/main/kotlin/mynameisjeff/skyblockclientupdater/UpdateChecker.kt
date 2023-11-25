@@ -1,12 +1,10 @@
 package mynameisjeff.skyblockclientupdater
 
-import com.google.gson.JsonParser
-import gg.essential.api.EssentialAPI
-import gg.essential.api.utils.Multithreading
-import gg.essential.api.utils.WebUtil
+import cc.polyfrost.oneconfig.utils.Multithreading
+import cc.polyfrost.oneconfig.utils.NetworkUtils
+import cc.polyfrost.oneconfig.utils.gui.GuiUtils
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.serializer
 import mynameisjeff.skyblockclientupdater.SkyClientUpdater.json
@@ -17,7 +15,6 @@ import mynameisjeff.skyblockclientupdater.data.MCMod
 import mynameisjeff.skyblockclientupdater.data.RepoMod
 import mynameisjeff.skyblockclientupdater.data.UpdateMod
 import mynameisjeff.skyblockclientupdater.gui.screens.ModUpdateScreen
-import mynameisjeff.skyblockclientupdater.utils.TickTask
 import mynameisjeff.skyblockclientupdater.utils.readTextAndClose
 import net.minecraft.client.gui.GuiMainMenu
 import net.minecraft.util.Util
@@ -79,9 +76,7 @@ class UpdateChecker {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onGuiOpened(event: GuiOpenEvent) {
         if (event.gui !is GuiMainMenu || ignoreUpdates || needsUpdate.isEmpty()) return
-        TickTask(2) {
-            EssentialAPI.getGuiUtil().openScreen(ModUpdateScreen(needsUpdate))
-        }
+        GuiUtils.displayScreen(ModUpdateScreen(needsUpdate), 2)
     }
 
     fun ignoreUpdates() {
@@ -90,16 +85,14 @@ class UpdateChecker {
 
     fun updateLatestCommitId() {
         latestCommitId = try {
-            val commits = JsonParser().parse(
-                WebUtil.fetchString(
-                    "https://api.github.com/repos/${
-                        System.getProperty(
-                            "scu.repo",
-                            "SkyblockClient/SkyblockClient-REPO"
-                        )
-                    }/commits"
-                ) ?: throw NullPointerException()
-            ).asJsonArray
+            val commits = NetworkUtils.getJsonElement(
+                "https://api.github.com/repos/${
+                    System.getProperty(
+                        "scu.repo",
+                        "SkyblockClient/SkyblockClient-REPO"
+                    )
+                }/commits"
+            )?.asJsonArray ?: throw NullPointerException()
             commits[0].asJsonObject["sha"].asString
         } catch (ex: Throwable) {
             logger.error("Failed to fetch latest commit ID.", ex)
@@ -209,9 +202,9 @@ class UpdateChecker {
     fun getLatestMods() {
         try {
             if (Config.enableBeta) {
-                latestMods.addAll(json.decodeFromString<List<RepoMod>>(WebUtil.fetchString("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods_beta.json") ?: run { Config.enableBeta = false; Config.markDirty(); Config.writeData(); throw UnsupportedOperationException("Beta mods not available, disabling...") }).filter { !it.ignored })
+                latestMods.addAll(json.decodeFromString<List<RepoMod>>(NetworkUtils.getString("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods_beta.json") ?: run { Config.enableBeta = false; Config.save(); throw UnsupportedOperationException("Beta mods not available, disabling...") }).filter { !it.ignored })
             }
-            latestMods.addAll(json.decodeFromString<List<RepoMod>>(WebUtil.fetchString("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods.json") ?: throw NullPointerException()).filter { !it.ignored })
+            latestMods.addAll(json.decodeFromString<List<RepoMod>>(NetworkUtils.getString("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods.json") ?: throw NullPointerException()).filter { !it.ignored })
         } catch (ex: Throwable) {
             logger.error("Failed to load mod files.", ex)
         }
@@ -374,7 +367,7 @@ class UpdateChecker {
             Multithreading.runAsync {
                 logger.info("Downloading SkyClientUpdater delete task.")
                 deleteTask = try {
-                    WebUtil.downloadToFile(url, taskFile, "SkyblockClient-Updater/${SkyClientUpdater.VERSION}")
+                    NetworkUtils.downloadFile(url, taskFile, "SkyblockClient-Updater/${SkyClientUpdater.VERSION}", 5000, true)
                     logger.info("SkyClientUpdater delete task successfully downloaded!")
                     taskFile
                 } catch (e: Exception) {

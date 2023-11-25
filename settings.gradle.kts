@@ -1,22 +1,30 @@
+@file:Suppress("PropertyName")
+
 pluginManagement {
     repositories {
-        mavenLocal()
         gradlePluginPortal()
         mavenCentral()
-
-        maven("https://jitpack.io/")
-        maven("https://maven.architectury.dev/")
-        maven("https://maven.fabricmc.net")
-        maven("https://maven.minecraftforge.net")
-        maven("https://repo.sk1er.club/repository/maven-public/")
+        maven("https://repo.polyfrost.org/releases") // Adds the Polyfrost maven repository to get Polyfrost Gradle Toolkit
     }
-    resolutionStrategy {
-        eachPlugin {
-            when (requested.id.id) {
-                "gg.essential.loom" -> useModule("gg.essential:architectury-loom:${requested.version}")
-            }
-        }
+    plugins {
+        val pgtVersion = "0.2.9" // Sets the default versions for Polyfrost Gradle Toolkit
+        id("org.polyfrost.multi-version.root") version pgtVersion
     }
 }
 
-rootProject.name = "SkyblockClient-Updater"
+val mod_name: String by settings
+
+// Configures the root project Gradle name based on the value in `gradle.properties`
+rootProject.name = mod_name
+rootProject.buildFileName = "root.gradle.kts"
+
+// Adds all of our build target versions to the classpath if we need to add version-specific code.
+listOf(
+    "1.8.9-forge"
+).forEach { version ->
+    include(":$version")
+    project(":$version").apply {
+        projectDir = file("versions/$version")
+        buildFileName = "../../build.gradle.kts"
+    }
+}

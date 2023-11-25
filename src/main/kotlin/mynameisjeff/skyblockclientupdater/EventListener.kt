@@ -1,6 +1,5 @@
 package mynameisjeff.skyblockclientupdater
 
-import gg.essential.api.EssentialAPI
 import mynameisjeff.skyblockclientupdater.config.Config
 import net.minecraft.client.gui.GuiButton
 import net.minecraft.client.gui.GuiOptions
@@ -24,8 +23,7 @@ class EventListener {
     @SubscribeEvent
     fun onGuiAction(event: GuiScreenEvent.ActionPerformedEvent) {
         if (event.gui !is GuiOptions || !Config.showButtonOnEscapeMenu) return
-        if (event.button.id == buttonId) EssentialAPI.getGuiUtil()
-            .openScreen(Config.gui())
+        if (event.button.id == buttonId) Config.openGui()
     }
 
     private fun generateButtonId(buttonList: List<GuiButton> = listOf()): Int {

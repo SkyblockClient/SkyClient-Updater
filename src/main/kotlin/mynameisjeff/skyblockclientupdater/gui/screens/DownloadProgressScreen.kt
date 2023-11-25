@@ -1,18 +1,18 @@
 package mynameisjeff.skyblockclientupdater.gui.screens
 
-import gg.essential.elementa.components.UIBlock
-import gg.essential.elementa.components.UIContainer
-import gg.essential.elementa.components.UIText
-import gg.essential.elementa.constraints.CenterConstraint
-import gg.essential.elementa.constraints.ChildBasedSizeConstraint
-import gg.essential.elementa.constraints.SiblingConstraint
-import gg.essential.elementa.constraints.animation.Animations
-import gg.essential.elementa.dsl.*
-import gg.essential.elementa.effects.OutlineEffect
-import gg.essential.universal.UMatrixStack
+import cc.polyfrost.oneconfig.utils.dsl.tick
+import cc.polyfrost.oneconfig.libs.elementa.components.UIBlock
+import cc.polyfrost.oneconfig.libs.elementa.components.UIContainer
+import cc.polyfrost.oneconfig.libs.elementa.components.UIText
+import cc.polyfrost.oneconfig.libs.elementa.constraints.CenterConstraint
+import cc.polyfrost.oneconfig.libs.elementa.constraints.ChildBasedSizeConstraint
+import cc.polyfrost.oneconfig.libs.elementa.constraints.SiblingConstraint
+import cc.polyfrost.oneconfig.libs.elementa.constraints.animation.Animations
+import cc.polyfrost.oneconfig.libs.elementa.dsl.*
+import cc.polyfrost.oneconfig.libs.elementa.effects.OutlineEffect
+import cc.polyfrost.oneconfig.libs.universal.UMatrixStack
 import mynameisjeff.skyblockclientupdater.SkyClientUpdater
 import mynameisjeff.skyblockclientupdater.gui.elements.SexyButton
-import mynameisjeff.skyblockclientupdater.utils.TickTask
 import mynameisjeff.skyblockclientupdater.UpdateChecker
 import mynameisjeff.skyblockclientupdater.data.UpdateMod
 import net.minecraft.client.gui.GuiMainMenu
@@ -179,7 +179,7 @@ class DownloadProgressScreen(
                 displayScreen(GuiMainMenu())
             }
             successfullyUpdated.size + failedUpdated.size == updating.size -> {
-                TickTask(5) {
+                tick(5) {
                     displayScreen(
                         UpdateSummaryScreen(
                             successfullyUpdated as HashSet<UpdateMod>,

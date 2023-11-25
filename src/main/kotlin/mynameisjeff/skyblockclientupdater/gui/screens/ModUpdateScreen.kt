@@ -1,15 +1,15 @@
 package mynameisjeff.skyblockclientupdater.gui.screens
 
-import gg.essential.elementa.components.ScrollComponent
-import gg.essential.elementa.components.UIContainer
-import gg.essential.elementa.components.UIText
-import gg.essential.elementa.constraints.CenterConstraint
-import gg.essential.elementa.constraints.ChildBasedSizeConstraint
-import gg.essential.elementa.constraints.RelativeConstraint
-import gg.essential.elementa.constraints.SiblingConstraint
-import gg.essential.elementa.dsl.childOf
-import gg.essential.elementa.dsl.constrain
-import gg.essential.elementa.dsl.pixels
+import cc.polyfrost.oneconfig.libs.elementa.components.ScrollComponent
+import cc.polyfrost.oneconfig.libs.elementa.components.UIContainer
+import cc.polyfrost.oneconfig.libs.elementa.components.UIText
+import cc.polyfrost.oneconfig.libs.elementa.constraints.CenterConstraint
+import cc.polyfrost.oneconfig.libs.elementa.constraints.ChildBasedSizeConstraint
+import cc.polyfrost.oneconfig.libs.elementa.constraints.RelativeConstraint
+import cc.polyfrost.oneconfig.libs.elementa.constraints.SiblingConstraint
+import cc.polyfrost.oneconfig.libs.elementa.dsl.childOf
+import cc.polyfrost.oneconfig.libs.elementa.dsl.constrain
+import cc.polyfrost.oneconfig.libs.elementa.dsl.pixels
 import mynameisjeff.skyblockclientupdater.UpdateChecker
 import mynameisjeff.skyblockclientupdater.data.UpdateMod
 import mynameisjeff.skyblockclientupdater.gui.elements.ModUpdateComponent

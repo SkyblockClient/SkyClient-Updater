@@ -1,15 +1,15 @@
 package mynameisjeff.skyblockclientupdater.gui.screens
 
-import gg.essential.elementa.ElementaVersion
-import gg.essential.elementa.WindowScreen
-import gg.essential.elementa.components.UIBlock
-import gg.essential.elementa.components.UIContainer
-import gg.essential.elementa.constraints.FillConstraint
-import gg.essential.elementa.constraints.RelativeConstraint
-import gg.essential.elementa.constraints.SiblingConstraint
-import gg.essential.elementa.dsl.childOf
-import gg.essential.elementa.dsl.constrain
-import gg.essential.elementa.dsl.percent
+import cc.polyfrost.oneconfig.libs.elementa.ElementaVersion
+import cc.polyfrost.oneconfig.libs.elementa.WindowScreen
+import cc.polyfrost.oneconfig.libs.elementa.components.UIBlock
+import cc.polyfrost.oneconfig.libs.elementa.components.UIContainer
+import cc.polyfrost.oneconfig.libs.elementa.constraints.FillConstraint
+import cc.polyfrost.oneconfig.libs.elementa.constraints.RelativeConstraint
+import cc.polyfrost.oneconfig.libs.elementa.constraints.SiblingConstraint
+import cc.polyfrost.oneconfig.libs.elementa.dsl.childOf
+import cc.polyfrost.oneconfig.libs.elementa.dsl.constrain
+import cc.polyfrost.oneconfig.libs.elementa.dsl.percent
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiScreen
 import java.awt.Color

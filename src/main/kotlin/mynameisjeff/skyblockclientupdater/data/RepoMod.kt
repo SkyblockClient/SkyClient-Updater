@@ -14,7 +14,7 @@ data class RepoMod(
     @SerialName("forge_id")
     val modId: String? = null,
     @SerialName("url")
-    val updateURL: String = "https://github.com/nacrt/SkyblockClient-REPO/raw/main/files/mods/$fileName",
+    val updateURL: String = "https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/mods/$fileName",
     @SerialName("update_to_ids")
     val updateToIds: Array<String> = arrayOf(),
     val ignored: Boolean = false,
