@@ -1,7 +1,7 @@
 [
   {
-    "modid": "skyblockclientupdater",
-    "name": "SkyClient Updater",
+    "modid": "${id}",
+    "name": "${name}",
     "description": "Checks for new versions for mods in SkyClient and updates them to their latest versions.",
     "version": "${version}",
     "mcversion": "1.8.9",
@@ -9,10 +9,10 @@
     "updateUrl": "",
     "authorList": [
       "My-Name-Is-Jeff",
-      "nacrt",
+      "SkyClient",
       "Deftu"
     ],
-    "credits": "W-OVERFLOW for Deleter task and minor improvements.",
+    "credits": "Polyfrost for Deleter task and minor improvements.",
     "logoFile": "",
     "screenshots": [],
     "dependencies": []

@@ -1,16 +1,16 @@
 package mynameisjeff.skyblockclientupdater.gui.screens
 
-import gg.essential.api.EssentialAPI
-import gg.essential.elementa.components.ScrollComponent
-import gg.essential.elementa.components.UIBlock
-import gg.essential.elementa.components.UIContainer
-import gg.essential.elementa.components.UIText
-import gg.essential.elementa.constraints.CenterConstraint
-import gg.essential.elementa.constraints.ChildBasedSizeConstraint
-import gg.essential.elementa.constraints.RelativeConstraint
-import gg.essential.elementa.constraints.SiblingConstraint
-import gg.essential.elementa.dsl.*
-import gg.essential.universal.ChatColor
+import cc.polyfrost.oneconfig.libs.elementa.components.ScrollComponent
+import cc.polyfrost.oneconfig.libs.elementa.components.UIBlock
+import cc.polyfrost.oneconfig.libs.elementa.components.UIContainer
+import cc.polyfrost.oneconfig.libs.elementa.components.UIText
+import cc.polyfrost.oneconfig.libs.elementa.constraints.CenterConstraint
+import cc.polyfrost.oneconfig.libs.elementa.constraints.ChildBasedSizeConstraint
+import cc.polyfrost.oneconfig.libs.elementa.constraints.RelativeConstraint
+import cc.polyfrost.oneconfig.libs.elementa.constraints.SiblingConstraint
+import cc.polyfrost.oneconfig.libs.elementa.dsl.*
+import cc.polyfrost.oneconfig.libs.universal.ChatColor
+import cc.polyfrost.oneconfig.utils.gui.GuiUtils
 import mynameisjeff.skyblockclientupdater.UpdateChecker
 import mynameisjeff.skyblockclientupdater.data.UpdateMod
 import mynameisjeff.skyblockclientupdater.gui.elements.SexyButton
@@ -90,7 +90,7 @@ class UpdateSummaryScreen(
         height = 20.pixels()
     }.onMouseClick {
         UpdateChecker.INSTANCE.ignoreUpdates()
-        EssentialAPI.getGuiUtil().openScreen(lastNonSCUScreen)
+        GuiUtils.displayScreen(lastNonSCUScreen)
     } childOf buttonContainer
 
     init {

@@ -1,14 +1,14 @@
 package mynameisjeff.skyblockclientupdater.command
 
-import gg.essential.api.EssentialAPI
-import gg.essential.api.commands.DefaultHandler
+import cc.polyfrost.oneconfig.utils.commands.annotations.Command
+import cc.polyfrost.oneconfig.utils.commands.annotations.Main
 import mynameisjeff.skyblockclientupdater.config.Config
 
-object Command : gg.essential.api.commands.Command("skyblockclientupdater") {
-    override val commandAliases = setOf(Alias("skyclientupdater"), Alias("scu"))
+@Command("skyclientupdater", aliases = ["skyblockclientupdater", "scu"])
+object Command {
 
-    @DefaultHandler
-    fun default() {
-        EssentialAPI.getGuiUtil().openScreen(Config.gui())
+    @Main
+    private fun main() {
+        Config.openGui()
     }
 }

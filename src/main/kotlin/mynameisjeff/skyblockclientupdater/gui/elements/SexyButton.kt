@@ -1,16 +1,16 @@
 package mynameisjeff.skyblockclientupdater.gui.elements
 
-import gg.essential.elementa.components.UIBlock
-import gg.essential.elementa.components.UIContainer
-import gg.essential.elementa.components.UIText
-import gg.essential.elementa.constraints.CenterConstraint
-import gg.essential.elementa.constraints.RelativeConstraint
-import gg.essential.elementa.constraints.animation.Animations
-import gg.essential.elementa.dsl.childOf
-import gg.essential.elementa.dsl.constrain
-import gg.essential.elementa.dsl.effect
-import gg.essential.elementa.effects.OutlineEffect
-import gg.essential.universal.USound
+import cc.polyfrost.oneconfig.libs.elementa.components.UIBlock
+import cc.polyfrost.oneconfig.libs.elementa.components.UIContainer
+import cc.polyfrost.oneconfig.libs.elementa.components.UIText
+import cc.polyfrost.oneconfig.libs.elementa.constraints.CenterConstraint
+import cc.polyfrost.oneconfig.libs.elementa.constraints.RelativeConstraint
+import cc.polyfrost.oneconfig.libs.elementa.constraints.animation.Animations
+import cc.polyfrost.oneconfig.libs.elementa.dsl.childOf
+import cc.polyfrost.oneconfig.libs.elementa.dsl.constrain
+import cc.polyfrost.oneconfig.libs.elementa.dsl.effect
+import cc.polyfrost.oneconfig.libs.elementa.effects.OutlineEffect
+import cc.polyfrost.oneconfig.libs.universal.USound
 import mynameisjeff.skyblockclientupdater.SkyClientUpdater
 import java.awt.Color
 
