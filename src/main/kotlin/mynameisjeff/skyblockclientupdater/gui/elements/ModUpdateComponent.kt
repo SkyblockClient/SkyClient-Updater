@@ -10,6 +10,7 @@ import cc.polyfrost.oneconfig.libs.elementa.dsl.childOf
 import cc.polyfrost.oneconfig.libs.elementa.dsl.constrain
 import cc.polyfrost.oneconfig.libs.elementa.dsl.toConstraint
 import cc.polyfrost.oneconfig.libs.universal.ChatColor
+import cc.polyfrost.oneconfig.libs.universal.UMatrixStack
 import mynameisjeff.skyblockclientupdater.SkyClientUpdater
 import mynameisjeff.skyblockclientupdater.UpdateChecker
 import mynameisjeff.skyblockclientupdater.data.UpdateMod
@@ -33,6 +34,14 @@ class ModUpdateComponent(
         x = SiblingConstraint(2f)
         color = SkyClientUpdater.accentColor.toConstraint()
     } childOf this
+
+    private var heldAction: (() -> Unit)? = null
+
+    override fun afterDraw(matrixStack: UMatrixStack) {
+        super.afterDraw(matrixStack)
+        heldAction?.invoke()
+        heldAction = null
+    }
 
     init {
         seperatorContainer.constrain {
@@ -68,27 +77,31 @@ class ModUpdateComponent(
                 }
             }
         }.onMouseEnter {
-            when (update.type) {
-                UpdateMod.Type.UPDATING -> {
-                    newFileText.setText("${ChatColor.GREEN}${update.name} ${ChatColor.WHITE}(skip)")
-                }
-                UpdateMod.Type.TEMP_DISABLE -> {
-                    newFileText.setText("${ChatColor.RED}${update.name} ${ChatColor.WHITE}(ignore)")
-                }
-                UpdateMod.Type.DISABLE -> {
-                    newFileText.setText("${ChatColor.GREEN}${update.name}")
+            heldAction = {
+                when (update.type) {
+                    UpdateMod.Type.UPDATING -> {
+                        newFileText.setText("${ChatColor.GREEN}${ChatColor.STRIKETHROUGH}${update.name} ${ChatColor.WHITE}(skip)")
+                    }
+                    UpdateMod.Type.TEMP_DISABLE -> {
+                        newFileText.setText("${ChatColor.RED}${ChatColor.STRIKETHROUGH}${update.name} ${ChatColor.WHITE}(ignore)")
+                    }
+                    UpdateMod.Type.DISABLE -> {
+                        newFileText.setText("${ChatColor.GREEN}${ChatColor.STRIKETHROUGH}${update.name}")
+                    }
                 }
             }
         }.onMouseLeave {
-            when (update.type) {
-                UpdateMod.Type.UPDATING -> {
-                    newFileText.setText("${ChatColor.GREEN}${update.name}")
-                }
-                UpdateMod.Type.TEMP_DISABLE -> {
-                    newFileText.setText("${ChatColor.GREEN}${ChatColor.STRIKETHROUGH}${update.name} ${ChatColor.WHITE}(skipping)")
-                }
-                UpdateMod.Type.DISABLE -> {
-                    newFileText.setText("${ChatColor.RED}${ChatColor.STRIKETHROUGH}${update.name} ${ChatColor.WHITE}(ignored)")
+            heldAction = {
+                when (update.type) {
+                    UpdateMod.Type.UPDATING -> {
+                        newFileText.setText("${ChatColor.GREEN}${update.name}")
+                    }
+                    UpdateMod.Type.TEMP_DISABLE -> {
+                        newFileText.setText("${ChatColor.GREEN}${ChatColor.STRIKETHROUGH}${update.name} ${ChatColor.WHITE}(skipping)")
+                    }
+                    UpdateMod.Type.DISABLE -> {
+                        newFileText.setText("${ChatColor.RED}${ChatColor.STRIKETHROUGH}${update.name} ${ChatColor.WHITE}(ignored)")
+                    }
                 }
             }
         }
