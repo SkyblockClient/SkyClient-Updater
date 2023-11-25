@@ -1,5 +1,7 @@
 # SkyClient Updater
 
+![Compact Powered by OneConfig](https://polyfrost.org/img/compact_vector.svg)
+
 This is a mod created for [SkyClient](https://github.com/nacrt/SkyblockClient). It updates mods in-game based on a data repository 
 
 Most of the code here was from my own work on [Skytils](https://github.com/Skytils/SkytilsMod)
