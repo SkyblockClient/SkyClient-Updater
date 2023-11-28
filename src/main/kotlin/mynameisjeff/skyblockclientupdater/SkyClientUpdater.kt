@@ -47,14 +47,14 @@ import javax.net.ssl.SSLContext
         progress.step("Fixing Modrinth SSL")
         try {
             var sslStore = SSLStore()
-            println("Attempting to load Modrinth certificate.")
-            sslStore = sslStore.load("/modrinth.com.der")
+            println("Attempting to load Let's Encrypt certificate.")
+            sslStore = sslStore.load("/isrg-root-x2.der")
             val context: SSLContext = sslStore.finish()
             SSLContext.setDefault(context)
             HttpsURLConnection.setDefaultSSLSocketFactory(context.socketFactory)
         } catch (e: Exception) {
             e.printStackTrace()
-            println("Failed to add Modrinth certificate to keystore.")
+            println("Failed to add Let's Encrypt certificate to keystore.")
         }
         progress.step("Downloading helper utility")
         UpdateChecker.INSTANCE.downloadHelperTask()
