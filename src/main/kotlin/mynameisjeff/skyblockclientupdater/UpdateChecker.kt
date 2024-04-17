@@ -1,8 +1,9 @@
 package mynameisjeff.skyblockclientupdater
 
+import cc.polyfrost.oneconfig.utils.JsonUtils
 import cc.polyfrost.oneconfig.utils.Multithreading
-import cc.polyfrost.oneconfig.utils.NetworkUtils
 import cc.polyfrost.oneconfig.utils.gui.GuiUtils
+import com.google.gson.JsonElement
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.decodeFromStream
@@ -25,12 +26,24 @@ import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.ModContainer
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import java.awt.Desktop
-import java.io.File
-import java.io.IOException
+import java.io.*
+import java.net.URL
+import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.security.KeyManagementException
+import java.security.KeyStore
+import java.security.KeyStoreException
+import java.security.NoSuchAlgorithmException
 import java.util.jar.JarFile
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManagerFactory
+
 
 /**
  * Taken from Skytils under GNU Affero General Public License v3.0
@@ -72,6 +85,7 @@ class UpdateChecker {
 
     var latestCommitId = "main"
     private var ignoreUpdates = false
+    var fixedSSLContext: SSLContext? = null
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onGuiOpened(event: GuiOpenEvent) {
@@ -85,7 +99,7 @@ class UpdateChecker {
 
     fun updateLatestCommitId() {
         latestCommitId = try {
-            val commits = NetworkUtils.getJsonElement(
+            val commits = getNetworkJsonElement(
                 "https://api.github.com/repos/${
                     System.getProperty(
                         "scu.repo",
@@ -202,9 +216,9 @@ class UpdateChecker {
     fun getLatestMods() {
         try {
             if (Config.enableBeta) {
-                latestMods.addAll(json.decodeFromString<List<RepoMod>>(NetworkUtils.getString("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods_beta.json") ?: run { Config.enableBeta = false; Config.save(); throw UnsupportedOperationException("Beta mods not available, disabling...") }).filter { !it.ignored })
+                latestMods.addAll(json.decodeFromString<List<RepoMod>>(getNetworkString("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods_beta.json") ?: run { Config.enableBeta = false; Config.save(); throw UnsupportedOperationException("Beta mods not available, disabling...") }).filter { !it.ignored })
             }
-            latestMods.addAll(json.decodeFromString<List<RepoMod>>(NetworkUtils.getString("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods.json") ?: throw NullPointerException()).filter { !it.ignored })
+            latestMods.addAll(json.decodeFromString<List<RepoMod>>(getNetworkString("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods.json") ?: throw NullPointerException()).filter { !it.ignored })
         } catch (ex: Throwable) {
             logger.error("Failed to load mod files.", ex)
         }
@@ -367,7 +381,7 @@ class UpdateChecker {
             Multithreading.runAsync {
                 logger.info("Downloading SkyClientUpdater delete task.")
                 deleteTask = try {
-                    NetworkUtils.downloadFile(url, taskFile, "SkyblockClient-Updater/${SkyClientUpdater.VERSION}", 5000, true)
+                    downloadNetworkFile(url, taskFile)
                     logger.info("SkyClientUpdater delete task successfully downloaded!")
                     taskFile
                 } catch (e: Exception) {
@@ -393,5 +407,72 @@ class UpdateChecker {
         }"
         if (!File(java).isFile) throw IOException("Unable to find suitable java runtime at $java")
         return java
+    }
+
+    fun getNetworkString(url: String): String? {
+        try {
+            InputStreamReader(
+                setupConnection(url),
+                StandardCharsets.UTF_8
+            ).use { input ->
+                return IOUtils.toString(input)
+            }
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+            return null
+        }
+    }
+
+    fun getNetworkJsonElement(url: String): JsonElement? {
+        return JsonUtils.parseString(getNetworkString(url))
+    }
+
+    fun downloadNetworkFile(aUrl: String, file: File): Boolean {
+        val url = aUrl.replace(" ", "%20")
+        try {
+            FileOutputStream(file).use { fileOut ->
+                BufferedInputStream(setupConnection(url)).use { `in` ->
+                    IOUtils.copy(
+                        `in`,
+                        fileOut
+                    )
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+            return false
+        }
+        return true
+    }
+
+    fun setupConnection(url: String): InputStream {
+        val connection = URL(url).openConnection() as HttpsURLConnection
+        connection.setRequestMethod("GET")
+        connection.setUseCaches(false)
+        connection.addRequestProperty("User-Agent", "SkyblockClient-Updater/${SkyClientUpdater.VERSION}")
+        connection.setReadTimeout(5000)
+        connection.setConnectTimeout(5000)
+        connection.setDoOutput(true)
+        if (fixedSSLContext != null) {
+            connection.sslSocketFactory = fixedSSLContext?.socketFactory
+        }
+        return connection.inputStream
+    }
+
+    fun setupSSL() {
+        try {
+            val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
+            val keyStorePath = Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts")
+            keyStore.load(Files.newInputStream(keyStorePath), null)
+
+            keyStore.load(this::class.java.getResourceAsStream("/polyfrost.jks"), "polyfrost".toCharArray())
+            val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
+            trustManagerFactory.init(keyStore)
+            val sslContext = SSLContext.getInstance("TLS")
+            sslContext.init(null, trustManagerFactory.trustManagers, null)
+            fixedSSLContext = sslContext
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

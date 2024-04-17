@@ -6,15 +6,12 @@ import kotlinx.serialization.modules.serializersModuleOf
 import mynameisjeff.skyblockclientupdater.command.Command
 import mynameisjeff.skyblockclientupdater.config.Config
 import mynameisjeff.skyblockclientupdater.data.FileSerializer
-import mynameisjeff.skyblockclientupdater.utils.ssl.SSLStore
 import net.minecraft.client.Minecraft
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.ProgressManager
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
 import java.awt.Color
-import javax.net.ssl.HttpsURLConnection
-import javax.net.ssl.SSLContext
 
 
 @Mod(
@@ -44,18 +41,8 @@ import javax.net.ssl.SSLContext
         Config.preload()
 
         val progress = ProgressManager.push("SkyClient Updater", 6)
-        progress.step("Fixing Modrinth SSL")
-        try {
-            var sslStore = SSLStore()
-            println("Attempting to load Let's Encrypt certificate.")
-            sslStore = sslStore.load("/isrg-root-x2.der")
-            val context: SSLContext = sslStore.finish()
-            SSLContext.setDefault(context)
-            HttpsURLConnection.setDefaultSSLSocketFactory(context.socketFactory)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            println("Failed to add Let's Encrypt certificate to keystore.")
-        }
+        progress.step("Fixing SSL")
+        UpdateChecker.INSTANCE.setupSSL()
         progress.step("Downloading helper utility")
         UpdateChecker.INSTANCE.downloadHelperTask()
         progress.step("Discovering mods")
