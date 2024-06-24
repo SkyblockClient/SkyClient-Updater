@@ -13,7 +13,7 @@ plugins {
     id("org.polyfrost.defaults.java")
     id("org.polyfrost.defaults.loom")
     id("com.github.johnrengelman.shadow")
-    id("net.kyori.blossom") version "1.3.1"
+    id("net.kyori.blossom") version "1.3.2"
     id("signing")
     java
 }
@@ -85,7 +85,7 @@ repositories {
 // Configures the libraries/dependencies for your mod.
 dependencies {
     // Adds the OneConfig library, so we can develop with it.
-    modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.1-alpha+")
+    modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.2-alpha+")
     shade("cc.polyfrost:elementa-$platform:560") {
         isTransitive = false
     }

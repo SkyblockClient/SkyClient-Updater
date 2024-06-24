@@ -231,6 +231,7 @@ class UpdateChecker {
         // update to mod id loop
         for (localMod in installedMods) {
             for (repoMod in latestMods) {
+                if (repoMod.internalId == "polypatcher") continue // lol i gotta fix this
                 if(checkModId(localMod, repoMod) && repoMod.updateToIds.isNotEmpty()) {
                     for (updateToId in repoMod.updateToIds) {
                         // mark the mod as updated
