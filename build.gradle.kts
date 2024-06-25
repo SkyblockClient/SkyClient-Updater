@@ -94,12 +94,72 @@ dependencies {
         isTransitive = false
     }
 
-    shade(ktor("serialization-kotlinx-json"))
+    shade(ktor("serialization-kotlinx-json")) {
+        exclude(module = "kotlin-reflect")
+        exclude(module = "kotlin-stdlib")
+        exclude(module = "kotlin-stdlib-common")
+        exclude(module = "kotlin-stdlib-jdk8")
+        exclude(module = "kotlin-stdlib-jdk7")
+        exclude(module = "kotlinx-coroutines-core")
+        exclude(module = "kotlinx-coroutines-core-jvm")
+        exclude(module = "kotlinx-coroutines-core-jdk8")
+        exclude(module = "kotlinx-coroutines-jdk8")
+        exclude(module = "kotlinx-serialization-core-jvm")
+        exclude(module = "kotlinx-serialization-json-jvm")
+    }
 
-    shade(ktorClient("core"))
-    shade(ktorClient("cio"))
-    shade(ktorClient("content-negotiation"))
-    shade(ktorClient("encoding"))
+    shade(ktorClient("core")) {
+        exclude(module = "kotlin-reflect")
+        exclude(module = "kotlin-stdlib")
+        exclude(module = "kotlin-stdlib-common")
+        exclude(module = "kotlin-stdlib-jdk8")
+        exclude(module = "kotlin-stdlib-jdk7")
+        exclude(module = "kotlinx-coroutines-core")
+        exclude(module = "kotlinx-coroutines-core-jvm")
+        exclude(module = "kotlinx-coroutines-core-jdk8")
+        exclude(module = "kotlinx-coroutines-jdk8")
+        exclude(module = "kotlinx-serialization-core-jvm")
+        exclude(module = "kotlinx-serialization-json-jvm")
+    }
+    shade(ktorClient("cio")) {
+        exclude(module = "kotlin-reflect")
+        exclude(module = "kotlin-stdlib")
+        exclude(module = "kotlin-stdlib-common")
+        exclude(module = "kotlin-stdlib-jdk8")
+        exclude(module = "kotlin-stdlib-jdk7")
+        exclude(module = "kotlinx-coroutines-core")
+        exclude(module = "kotlinx-coroutines-core-jvm")
+        exclude(module = "kotlinx-coroutines-core-jdk8")
+        exclude(module = "kotlinx-coroutines-jdk8")
+        exclude(module = "kotlinx-serialization-core-jvm")
+        exclude(module = "kotlinx-serialization-json-jvm")
+    }
+    shade(ktorClient("content-negotiation")) {
+        exclude(module = "kotlin-reflect")
+        exclude(module = "kotlin-stdlib")
+        exclude(module = "kotlin-stdlib-common")
+        exclude(module = "kotlin-stdlib-jdk8")
+        exclude(module = "kotlin-stdlib-jdk7")
+        exclude(module = "kotlinx-coroutines-core")
+        exclude(module = "kotlinx-coroutines-core-jvm")
+        exclude(module = "kotlinx-coroutines-core-jdk8")
+        exclude(module = "kotlinx-coroutines-jdk8")
+        exclude(module = "kotlinx-serialization-core-jvm")
+        exclude(module = "kotlinx-serialization-json-jvm")
+    }
+    shade(ktorClient("encoding")) {
+        exclude(module = "kotlin-reflect")
+        exclude(module = "kotlin-stdlib")
+        exclude(module = "kotlin-stdlib-common")
+        exclude(module = "kotlin-stdlib-jdk8")
+        exclude(module = "kotlin-stdlib-jdk7")
+        exclude(module = "kotlinx-coroutines-core")
+        exclude(module = "kotlinx-coroutines-core-jvm")
+        exclude(module = "kotlinx-coroutines-core-jdk8")
+        exclude(module = "kotlinx-coroutines-jdk8")
+        exclude(module = "kotlinx-serialization-core-jvm")
+        exclude(module = "kotlinx-serialization-json-jvm")
+    }
 
     //modRuntimeOnly("me.djtheredstoner:DevAuth-${if (platform.isFabric) "fabric" else if (platform.isLegacyForge) "forge-legacy" else "forge-latest"}:1.1.2")
 
