@@ -17,7 +17,13 @@ data class RepoMod(
     val updateURL: String = "https://github.com/SkyblockClient/SkyblockClient-REPO/raw/main/files/mods/$fileName",
     @SerialName("update_to_ids")
     val updateToIds: Array<String> = arrayOf(),
+    @SerialName("name_detection")
+    val nameDetection: Boolean = true,
+    @SerialName("update_ids_detection")
+    val updateIdsDetection: Boolean = true,
     val ignored: Boolean = false,
+    @SerialName("ignore_on_scu_137_above")
+    val ignoredNew: Boolean = false,
     val hasBrokenMCModInfo: Boolean = false,
     val alwaysConsider: Boolean = false,
 ) {

@@ -1,20 +1,24 @@
 package mynameisjeff.skyblockclientupdater
 
-import cc.polyfrost.oneconfig.utils.JsonUtils
-import cc.polyfrost.oneconfig.utils.Multithreading
 import cc.polyfrost.oneconfig.utils.gui.GuiUtils
-import com.google.gson.JsonElement
+import io.ktor.client.call.*
+import io.ktor.client.plugins.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.util.cio.*
+import io.ktor.utils.io.*
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.decodeFromStream
 import kotlinx.serialization.serializer
+import mynameisjeff.skyblockclientupdater.SkyClientUpdater.client
 import mynameisjeff.skyblockclientupdater.SkyClientUpdater.json
 import mynameisjeff.skyblockclientupdater.SkyClientUpdater.mc
 import mynameisjeff.skyblockclientupdater.config.Config
-import mynameisjeff.skyblockclientupdater.data.LocalMod
-import mynameisjeff.skyblockclientupdater.data.MCMod
-import mynameisjeff.skyblockclientupdater.data.RepoMod
-import mynameisjeff.skyblockclientupdater.data.UpdateMod
+import mynameisjeff.skyblockclientupdater.data.*
 import mynameisjeff.skyblockclientupdater.gui.screens.ModUpdateScreen
 import mynameisjeff.skyblockclientupdater.utils.readTextAndClose
 import net.minecraft.client.gui.GuiMainMenu
@@ -26,23 +30,12 @@ import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.ModContainer
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.logging.log4j.LogManager
 import java.awt.Desktop
 import java.io.*
-import java.net.URL
-import java.nio.charset.StandardCharsets
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.security.KeyManagementException
-import java.security.KeyStore
-import java.security.KeyStoreException
-import java.security.NoSuchAlgorithmException
+import java.security.*
 import java.util.jar.JarFile
-import javax.net.ssl.HttpsURLConnection
-import javax.net.ssl.SSLContext
-import javax.net.ssl.TrustManagerFactory
 
 
 /**
@@ -72,8 +65,11 @@ class UpdateChecker {
             MinecraftForge.EVENT_BUS.unregister(INSTANCE)
             INSTANCE = UpdateChecker()
             MinecraftForge.EVENT_BUS.register(INSTANCE)
-            INSTANCE.updateLatestCommitId()
-            INSTANCE.getLatestMods()
+
+            runBlocking {
+                INSTANCE.updateLatestCommitId()
+                INSTANCE.getLatestMods()
+            }
             INSTANCE.getUpdateCandidates()
         }
     }
@@ -85,7 +81,6 @@ class UpdateChecker {
 
     var latestCommitId = "main"
     private var ignoreUpdates = false
-    var fixedSSLContext: SSLContext? = null
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onGuiOpened(event: GuiOpenEvent) {
@@ -97,17 +92,16 @@ class UpdateChecker {
         ignoreUpdates = true
     }
 
-    fun updateLatestCommitId() {
+    suspend fun updateLatestCommitId() {
         latestCommitId = try {
-            val commits = getNetworkJsonElement(
+            client.get(
                 "https://api.github.com/repos/${
                     System.getProperty(
                         "scu.repo",
                         "SkyblockClient/SkyblockClient-REPO"
                     )
                 }/commits"
-            )?.asJsonArray ?: throw NullPointerException()
-            commits[0].asJsonObject["sha"].asString
+            ).body<List<GitHubCommit>>()[0].sha
         } catch (ex: Throwable) {
             logger.error("Failed to fetch latest commit ID.", ex)
             "main"
@@ -213,12 +207,34 @@ class UpdateChecker {
         return list
     }
 
-    fun getLatestMods() {
+    suspend fun getLatestMods() {
         try {
             if (Config.enableBeta) {
-                latestMods.addAll(json.decodeFromString<List<RepoMod>>(getNetworkString("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods_beta.json") ?: run { Config.enableBeta = false; Config.save(); throw UnsupportedOperationException("Beta mods not available, disabling...") }).filter { !it.ignored })
+                val response = client.get("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods_beta.json") {
+                    expectSuccess = false
+                }
+                if (response.status == HttpStatusCode.OK) {
+                    latestMods.addAll(response.body<List<RepoMod>>().filter { !it.ignored && !it.ignoredNew })
+                } else {
+                    logger.error("Failed to load beta mod files, turning off beta.")
+                    Config.enableBeta = false
+                    Config.save()
+                }
             }
-            latestMods.addAll(json.decodeFromString<List<RepoMod>>(getNetworkString("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods.json") ?: throw NullPointerException()).filter { !it.ignored })
+            if (Config.enableTesting) {
+                val response = client.get("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods_test.json") {
+                    expectSuccess = false
+                }
+                if (response.status == HttpStatusCode.OK) {
+                    latestMods.addAll(response.body<List<RepoMod>>().filter { !it.ignored && !it.ignoredNew })
+                } else {
+                    logger.error("Failed to load testing mod files, turning off testing.")
+                    Config.enableTesting = false
+                    Config.save()
+                }
+            }
+            val response = client.get("https://cdn.jsdelivr.net/gh/SkyblockClient/SkyblockClient-REPO@$latestCommitId/files/mods.json")
+            latestMods.addAll(response.body<List<RepoMod>>().filter { !it.ignored && !it.ignoredNew })
         } catch (ex: Throwable) {
             logger.error("Failed to load mod files.", ex)
         }
@@ -228,10 +244,19 @@ class UpdateChecker {
     fun getUpdateCandidates() {
         val checkedMods = ArrayList<String>()
 
+        if (Config.enableTesting) {
+            for (localMod in installedMods) {
+                logger.warn("LOCAL: Checking for updates for ${localMod.file.name}")
+            }
+            for (repoMod in latestMods) {
+                logger.warn("REPO: Checking for updates for ${repoMod.internalId} ${repoMod.fileName}")
+            }
+        }
+
         // update to mod id loop
         for (localMod in installedMods) {
             for (repoMod in latestMods) {
-                if (repoMod.internalId == "patcher" && localMod.file.name.contains("polypatcher", ignoreCase = true)) continue // lol i gotta fix this
+                if (!repoMod.updateIdsDetection) continue
                 if(checkModId(localMod, repoMod) && repoMod.updateToIds.isNotEmpty()) {
                     for (updateToId in repoMod.updateToIds) {
                         // mark the mod as updated
@@ -284,6 +309,7 @@ class UpdateChecker {
                 continue@loopMods
             val fileName = localMod.file.name
             for (repoMod in repoModList) {
+                if (!repoMod.nameDetection) continue
                 if (checkMatch(repoMod.fileName, fileName))
                 {
                     checkedMods.add(localMod.file.name)
@@ -379,7 +405,7 @@ class UpdateChecker {
         taskDir.mkdirs()
         val taskFile = File(taskDir, url.substringAfterLast("/"))
         if (!taskFile.exists()) {
-            Multithreading.runAsync {
+            SkyClientUpdater.IO.launch {
                 logger.info("Downloading SkyClientUpdater delete task.")
                 deleteTask = try {
                     downloadNetworkFile(url, taskFile)
@@ -410,70 +436,25 @@ class UpdateChecker {
         return java
     }
 
-    fun getNetworkString(url: String): String? {
-        try {
-            InputStreamReader(
-                setupConnection(url),
-                StandardCharsets.UTF_8
-            ).use { input ->
-                return IOUtils.toString(input)
+    suspend fun downloadNetworkFile(aUrl: String, file: File): Boolean {
+        val urlName = aUrl.replace(" ", "%20")
+        val url = Url(urlName)
+
+        val download = client.get(url) {
+            expectSuccess = false
+            timeout {
+                connectTimeoutMillis = null
+                requestTimeoutMillis = null
+                socketTimeoutMillis = null
             }
-        } catch (e: java.lang.Exception) {
-            e.printStackTrace()
-            return null
         }
-    }
-
-    fun getNetworkJsonElement(url: String): JsonElement? {
-        return JsonUtils.parseString(getNetworkString(url))
-    }
-
-    fun downloadNetworkFile(aUrl: String, file: File): Boolean {
-        val url = aUrl.replace(" ", "%20")
-        try {
-            FileOutputStream(file).use { fileOut ->
-                BufferedInputStream(setupConnection(url)).use { `in` ->
-                    IOUtils.copy(
-                        `in`,
-                        fileOut
-                    )
-                }
-            }
-        } catch (e: java.lang.Exception) {
-            e.printStackTrace()
+        if (download.status != HttpStatusCode.OK) {
+            println("$url returned status code ${download.status}")
+            return false
+        }
+        if (download.bodyAsChannel().copyTo(file.writeChannel()) == 0L) {
             return false
         }
         return true
-    }
-
-    fun setupConnection(url: String): InputStream {
-        val connection = URL(url).openConnection() as HttpsURLConnection
-        connection.setRequestMethod("GET")
-        connection.setUseCaches(false)
-        connection.addRequestProperty("User-Agent", "SkyblockClient-Updater/${SkyClientUpdater.VERSION}")
-        connection.setReadTimeout(5000)
-        connection.setConnectTimeout(5000)
-        connection.setDoOutput(true)
-        if (fixedSSLContext != null) {
-            connection.sslSocketFactory = fixedSSLContext?.socketFactory
-        }
-        return connection.inputStream
-    }
-
-    fun setupSSL() {
-        try {
-            val keyStore = KeyStore.getInstance(KeyStore.getDefaultType())
-            val keyStorePath = Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts")
-            keyStore.load(Files.newInputStream(keyStorePath), null)
-
-            keyStore.load(this::class.java.getResourceAsStream("/polyfrost.jks"), "polyfrost".toCharArray())
-            val trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm())
-            trustManagerFactory.init(keyStore)
-            val sslContext = SSLContext.getInstance("TLS")
-            sslContext.init(null, trustManagerFactory.trustManagers, null)
-            fixedSSLContext = sslContext
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
     }
 }

@@ -67,6 +67,9 @@ loom {
 
 // Creates the shade/shadow configuration, so we can include libraries inside our mod, rather than having to add them separately.
 val shade: Configuration by configurations.creating {
+    configurations.implementation.get().extendsFrom(this)
+}
+val shadeMod: Configuration by configurations.creating {
     configurations.modImplementation.get().extendsFrom(this)
 }
 
@@ -80,15 +83,23 @@ sourceSets {
 // Adds the Polyfrost maven repository so that we can get the libraries necessary to develop the mod.
 repositories {
     maven("https://repo.polyfrost.org/releases")
+    mavenCentral()
 }
 
 // Configures the libraries/dependencies for your mod.
 dependencies {
     // Adds the OneConfig library, so we can develop with it.
     modCompileOnly("cc.polyfrost:oneconfig-$platform:0.2.2-alpha+")
-    shade("cc.polyfrost:elementa-$platform:560") {
+    shadeMod("cc.polyfrost:elementa-$platform:560") {
         isTransitive = false
     }
+
+    shade(ktor("serialization-kotlinx-json"))
+
+    shade(ktorClient("core"))
+    shade(ktorClient("cio"))
+    shade(ktorClient("content-negotiation"))
+    shade(ktorClient("encoding"))
 
     //modRuntimeOnly("me.djtheredstoner:DevAuth-${if (platform.isFabric) "fabric" else if (platform.isLegacyForge) "forge-legacy" else "forge-latest"}:1.1.2")
 
@@ -162,7 +173,7 @@ tasks {
     // include some dependencies within our mod jar file.
     named<ShadowJar>("shadowJar") {
         archiveClassifier.set("dev") // TODO: machete gets confused by the `dev` prefix.
-        configurations = listOf(shade)
+        configurations = listOf(shade, shadeMod)
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
@@ -186,3 +197,8 @@ tasks {
         enabled = false
     }
 }
+
+fun DependencyHandler.ktor(module: String, version: String? = "2.3.9", addSuffix: Boolean = true) =
+    "io.ktor:ktor-$module${if (addSuffix) "-jvm" else ""}${version?.let { ":$version" } ?: ""}"
+
+fun DependencyHandler.ktorClient(module: String, version: String? = "2.3.9") = ktor("client-${module}", version)

@@ -25,6 +25,13 @@ object Config : cc.polyfrost.oneconfig.config.Config(Mod("SkyClient Updater", Mo
     )
     var enableBeta = false
 
+    @Switch(
+        name = "Enable Testing Repo",
+        description = "DO NOT ENABLE UNLESS YOU ARE A DEVELOPER.",
+        category = "General"
+    )
+    var enableTesting = false
+
     @Button(
         name = "Check for Updates",
         description = "Check for updates again. This might take a while after clicking this button.",
