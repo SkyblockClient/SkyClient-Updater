@@ -399,27 +399,64 @@ class UpdateChecker {
     }
 
     fun downloadHelperTask() {
-        logger.info("Checking for SkyClientUpdater delete task...")
-        val url =
-            "https://github.com/Polyfrost/Deleter/releases/download/v1.8/Deleter-1.8.jar"
+        logger.info("Checking for Polyfrost Deleter task...")
+        val md5Url = "https://github.com/Polyfrost/Deleter/releases/download/v1.8/md5.md5"
+        val releaseUrl = "https://github.com/Polyfrost/Deleter/releases/download/v1.8/Deleter-1.8.jar"
         taskDir.mkdirs()
-        val taskFile = File(taskDir, url.substringAfterLast("/"))
-        if (!taskFile.exists()) {
-            SkyClientUpdater.IO.launch {
-                logger.info("Downloading SkyClientUpdater delete task.")
+        val taskFile = File(taskDir, releaseUrl.substringAfterLast("/"))
+        SkyClientUpdater.IO.launch {
+            if (shouldDownloadDeleter(taskFile, md5Url)) {
+                logger.info("Downloading Polyfrost Deleter task.")
                 deleteTask = try {
-                    downloadNetworkFile(url, taskFile)
-                    logger.info("SkyClientUpdater delete task successfully downloaded!")
+                    downloadNetworkFile(releaseUrl, taskFile)
+                    logger.info("Polyfrost Deleter task successfully downloaded!")
                     taskFile
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    logger.info("Downloading SkyClientUpdater delete task failed!")
-                    File("invalid")
+                    logger.info("Downloading Polyfrost Deleter task failed!")
+                    if (taskFile.exists()) taskFile else File("invalid")
                 }
             }
+        }
+    }
+
+    private suspend fun shouldDownloadDeleter(taskFile: File, md5Url: String): Boolean {
+        if (!taskFile.exists()) return true
+        logger.info("Downloading Polyfrost Deleter task md5...")
+        val md5 = try {
+            val response = client.get(md5Url) {
+                expectSuccess = false
+            }
+            if (response.status == HttpStatusCode.OK) {
+                response.body<String>()
+            } else {
+                logger.info("Downloading Polyfrost Deleter task md5 failed!")
+                return false
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            logger.info("Downloading Polyfrost Deleter task md5 failed!")
+            return false
+        }
+        if (md5.isNotEmpty()) {
+            val md5Hash = try {
+                val digest = MessageDigest.getInstance("MD5")
+                val hash = digest.digest(taskFile.readBytes())
+                hash.joinToString("") { "%02x".format(it) }
+            } catch (e: NoSuchAlgorithmException) {
+                e.printStackTrace()
+                return false
+            }
+            return if (md5Hash == md5) {
+                logger.info("Polyfrost Deleter task is up to date.")
+                false
+            } else {
+                logger.info("Polyfrost Deleter task is either oudated or corrupted, redownloading.")
+                true
+            }
         } else {
-            deleteTask = taskFile
-            logger.info("SkyClientUpdater delete task found")
+            logger.info("Polyfrost Deleter task md5 is empty, skipping download.")
+            return false
         }
     }
 
