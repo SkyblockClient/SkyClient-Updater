@@ -405,9 +405,9 @@ class UpdateChecker {
         taskDir.mkdirs()
         val taskFile = File(taskDir, releaseUrl.substringAfterLast("/"))
         SkyClientUpdater.IO.launch {
-            if (shouldDownloadDeleter(taskFile, md5Url)) {
+            deleteTask = if (shouldDownloadDeleter(taskFile, md5Url)) {
                 logger.info("Downloading Polyfrost Deleter task.")
-                deleteTask = try {
+                try {
                     downloadNetworkFile(releaseUrl, taskFile)
                     logger.info("Polyfrost Deleter task successfully downloaded!")
                     taskFile
@@ -416,6 +416,8 @@ class UpdateChecker {
                     logger.info("Downloading Polyfrost Deleter task failed!")
                     if (taskFile.exists()) taskFile else File("invalid")
                 }
+            } else {
+                if (taskFile.exists()) taskFile else File("invalid")
             }
         }
     }
