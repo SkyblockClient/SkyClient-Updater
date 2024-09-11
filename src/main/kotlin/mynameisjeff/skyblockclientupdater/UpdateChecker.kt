@@ -331,7 +331,7 @@ class UpdateChecker {
                 ignoredJson.inputStream().use { inputStream ->
                     ignored.addAll(json.decodeFromStream<List<UpdateMod>>(inputStream))
                     ignored.forEach { removed ->
-                        needsUpdate.removeIf { removed == it }
+                        needsUpdate.removeIf { removed.updateURL == it.updateURL }
                     }
                 }
             }
